@@ -144,10 +144,6 @@
               </p>-->
             </td>
             <td rowspan="2"  >
-              <!--&nbsp;<a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
-              <br> &nbsp;
-              <a-button  style="background-color: #1585ff; color: white;margin-top: 7px" @click="searchN"><a-icon type="search" />Search</a-button>
-              <a-button style="width: 90px" @click="resetButton">reset </a-button>-->
             </td>
           </tr>
           <tr>
@@ -333,10 +329,6 @@
               </p>
             </td>
             <td rowspan="2" >
-               <!--&nbsp;<a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
-              <br> &nbsp;
-              <a-button  style="background-color: #1585ff; color: white;margin-top: 7px;" @click="searchN"><a-icon type="search" />Search</a-button>
-              <a-button style="width: 90px" @click="resetButton">reset </a-button>-->
             </td>
           </tr>
           <tr>
@@ -906,6 +898,7 @@ export default {
         url:'/monitor/admin/users/list',
       }).then(res=>{
         if(res.data.code=='1001'){
+
           this.dataList2 = res.data.data.data;
           Object.keys(this.dataList2).forEach(key=>{
             let name = this.dataList2[key].name
@@ -1105,6 +1098,7 @@ export default {
           this.getDataList();
         }
         else{
+          // TODO 使用element ui 提示
           alert('请完善信息')
         }
       })
