@@ -102,39 +102,39 @@
 </template>
 <script>
 const columns = [
-    {
-      title: '主链',
-      dataIndex: 'mainChain',
-      key: 'mainChain',
-      filters:[],
-      onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
-    },
-    {
-      title: '币种名称',
-      dataIndex: 'coinName',
-      key: 'coinName',
-      filters: [],
-      onFilter: (value, record) => record.coinName.indexOf(value) === 0,
-    },
-    {
-      title: '合约地址',
-      dataIndex: 'contractAddr',
-      key: 'contractAddr',
-    },
-    {
-      title: '小数位',
-      dataIndex: 'point',
-      key: 'point',
-    },
-    {
-      title: '操作',
-      dataIndex: '',
-      key: 'action',
-      scopedSlots: {
-        customRender: 'action',
-      }
-    },
-  ];
+  {
+    title: '主链',
+    dataIndex: 'mainChain',
+    key: 'mainChain',
+    filters:[],
+    onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
+  },
+  {
+    title: '币种名称',
+    dataIndex: 'coinName',
+    key: 'coinName',
+    filters: [],
+    onFilter: (value, record) => record.coinName.indexOf(value) === 0,
+  },
+  {
+    title: '合约地址',
+    dataIndex: 'contractAddr',
+    key: 'contractAddr',
+  },
+  {
+    title: '小数位',
+    dataIndex: 'point',
+    key: 'point',
+  },
+  {
+    title: '操作',
+    dataIndex: '',
+    key: 'action',
+    scopedSlots: {
+      customRender: 'action',
+    }
+  },
+];
 
 
 export default {

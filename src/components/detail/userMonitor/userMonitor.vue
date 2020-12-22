@@ -6,60 +6,62 @@
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
     <div class="table">
-    <a-table :columns="columns" :data-source="dataList" :pagination="pagination">
+      <a-table :columns="columns" :data-source="dataList" :pagination="pagination" rowKey="id">
 
-      <div
-        slot="filterDropdown"
-        slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
-        style="padding: 8px"
-      >
-       <!-- <a-input
-          v-ant-ref="c => (searchInput = c)"
-          :placeholder="`Search ${column.dataIndex}`"
-          :value="selectedKeys[0]"
-          style="width: 188px; margin-bottom: 8px; display: block;"
-          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
-          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
-        />
-        <a-button
-          type="primary"
-          icon="search"
-          size="small"
-          style="width: 90px; margin-right: 8px"
-          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        <div
+          slot="filterDropdown"
+          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+          style="padding: 8px"
+          id="test"
         >
-          Search
-        </a-button>
-        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
-          Reset
-        </a-button>-->
-        <a-input
-          style="width: 188px; margin-bottom: 8px; display: block;"
-          placeholder="Search Name"
-          v-model="searchName"
+
+          <!--<a-input
+            v-ant-ref="c => (searchInput = c)"
+            :placeholder="`Search ${column.dataIndex}`"
+            :value="selectedKeys[0]"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+          />
+          <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+          >
+            Search
+          </a-button>
+          <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+            Reset
+          </a-button>-->
+          <a-input
+            id="searchInput"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            placeholder="Search Name"
+            v-model="searchName"
+            @pressEnter="searchNameAjax"
+          />
+          <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="searchNameAjax"
+          >
+            Search
+          </a-button>
+          <a-button size="small" style="width: 90px" @click="reset">
+            Reset
+          </a-button>
+        </div>
+        <a-icon
+          slot="filterIcon"
+          slot-scope="filtered"
+          type="search"
+          :style="{ color: filtered ? '#108ee9' : undefined }"
         />
-        <a-button
-          type="primary"
-          icon="search"
-          size="small"
-          style="width: 90px; margin-right: 8px"
-          @click="searchNameAjax"
-        >
-          Search
-        </a-button>
-        <a-button size="small" style="width: 90px" @click="reset">
-          Reset
-        </a-button>
-
-
-      </div>
-      <a-icon
-        slot="filterIcon"
-        slot-scope="filtered"
-        type="search"
-        :style="{ color: filtered ? '#108ee9' : undefined }"
-      />
-      <template slot="customRender" slot-scope="text, record, index, column">
+        <template slot="customRender" slot-scope="text, record, index, column">
       <span v-if="searchText && searchedColumn === column.dataIndex">
         <template
           v-for="(fragment, i) in text
@@ -75,24 +77,24 @@
           <template v-else>{{ fragment }}</template>
         </template>
       </span>
-        <template v-else>
-          {{ text }}
+          <template v-else>
+            {{ text }}
+          </template>
         </template>
-      </template>
-      <span slot="state" slot-scope="tags">
+        <span slot="state" slot-scope="tags">
         <a-badge :status="statePoint(tags)"></a-badge>
         {{tags | stateFun}}
       </span>
-      <span slot="action" slot-scope="text, record">
+        <span slot="action" slot-scope="text, record">
         <a  @click="edit(text.name,text.phone,text.email,text.remark, text.id)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
         <a  @click="gotoLog">提醒日志</a>
       </span>
-      <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
-        添加时间：{{ record.createTime }}
-      </p>
-    </a-table>
+        <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
+          添加时间：{{ record.createTime | timeFilter}}
+        </p>
+      </a-table>
     </div>
     <a-modal
       title="添加/编辑新用户"
@@ -180,7 +182,7 @@
   </div>
 </template>
 <script>
-
+let flag=false
 const columns = [
   {
     title: 'AppID',
@@ -201,18 +203,39 @@ const columns = [
       filterIcon: 'filterIcon',
       customRender: 'customRender',
     },
-    onFilter: (value, record) =>
+    onFilter: (value, record) =>{
+      console.log(record)
+      console.log(value)
       record.name
         .toString()
         .toLowerCase()
-        .includes(value.toLowerCase()),
+        .includes(value.toLowerCase())
+    },
+
     onFilterDropdownVisibleChange: visible => {
       if (visible) {
         setTimeout(() => {
-          this.searchInput.focus();
+          const input = document.getElementById("searchInput")
+          input.focus()
+          // this.searchInput.focus();
         }, 0);
       }
     },
+    /*onFilterDropdownVisibleChange:(visible) => { //是否显示筛选框
+     // columns[2].filterDropdownVisible=true
+      if(!visible){
+    columns[2].filterDropdownVisible=false
+  }
+
+      /!*if(visible){
+        columns[2].filterDropdownVisible=true
+
+      }else{
+        columns[2].filterDropdownVisible=false
+      }*!/
+    }*/
+
+
   },
   {
     title: '手机',
@@ -301,11 +324,16 @@ export default {
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
+          // setTimeout(function(){document.getElementById("test").style.display="none";},0);
+          // setTimeout(function(){document.getElementById("test").style.display="block";},1000);
+         // columns[2].filterDropdownVisible=false
+
         }
         else {
           this.dataList=null;
         }
       })
+
     },
     reset(){
       this.searchName='';
@@ -327,20 +355,20 @@ export default {
       })
     },
     getDataList(){
-      let that = this;
-      that.$ajax({
+      this.$ajax({
         method:"get",
         url:'/monitor/admin/users',
+        headers: {"Content-Type": "application/json"},
         params:{
           name:'',
-          currentPage:that.currentPage,
-          pageSize:that.pageSize,
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
         }
       }).then(res=>{
         console.log(res)
         if(res.data.code == '1001'){
-          that.dataList = res.data.data.data
-          that.total=res.data.data.total
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
         }
       })
     },
@@ -357,11 +385,11 @@ export default {
         }
       }).then(res=>{
         if(res.data.code=='1001'){
-         // that.$message.success(res.data.msg);
+          // that.$message.success(res.data.msg);
           alert('添加成功')
           this.getDataList();
         }else{
-         // that.$message.success(res.data.msg);
+          // that.$message.success(res.data.msg);
           alert('添加失败')
         }
       })
@@ -399,7 +427,7 @@ export default {
         }
       }).then(res=>{
         if(res.data.code == "1001"){
-         // that.$message.success(res.data.msg);
+          // that.$message.success(res.data.msg);
           alert('成功重新启用此用户')
           that.getDataList();
         }else {
@@ -434,7 +462,7 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      this.searchText = selectedKeys[0];
+      //this.searchText = selectedKeys[0];
       this.searchedColumn = dataIndex;
     },
     handleReset(clearFilters) {
@@ -526,7 +554,23 @@ export default {
       }
       else
         return '禁用'
-    }
+    },
+    timeFilter(time){
+      let d = time ? new Date(time) : new Date();
+      let year = d.getFullYear();
+      let month = d.getMonth() + 1;
+      let day = d.getDate();
+      let hours = d.getHours();
+      let min = d.getMinutes();
+      let seconds = d.getSeconds();
+      if (month < 10) month = '0' + month;
+      if (day < 10) day = '0' + day;
+      if (hours < 0) hours = '0' + hours;
+      if (min < 10) min = '0' + min;
+      if (seconds < 10) seconds = '0' + seconds;
+      return (year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds);
+
+    },
 
   },
   mounted() {

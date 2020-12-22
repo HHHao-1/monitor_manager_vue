@@ -35,6 +35,7 @@
           style="width: 188px; margin-bottom: 8px; display: block;"
           placeholder="Search Name"
           v-model="searchEvent"
+          @pressEnter="searchEventAjax"
         />
         <a-button
           type="primary"
@@ -82,9 +83,9 @@
         {{way | noticeWayFun}}
       </span>
       <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
-        提醒内容:<br>
-        1.交易哈希：{{record.transHash}}<br>
-        2.异动时间：{{record.unusualTime}}
+        提醒内容:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        交易哈希：[{{record.transHash}}]   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        异动时间：[{{record.unusualTime}}]
       </p>
     </a-table>
     <div class="page">
@@ -152,6 +153,7 @@ export default {
       searchInput: null,
       searchedColumn: '',
       dataList:[],
+      dataList1:[],
 
       columns: [
         {
@@ -305,26 +307,24 @@ export default {
       this.searchText = '';
     },
     searchCoin(){
-     // this.$parent.searchCoinInfo();
+      // this.$parent.searchCoinInfo();
       this.$emit('searchCoinInfo');
     },
     searchCoinInfo(){
-      let that = this;
-      that.$ajax({
+      this.$ajax({
         method:"get",
         url:'/monitor/admin/coinlist',
       }).then(res=>{
         console.log(res)
         if(res.data.code == '1001'){
-          console.log('132412352435')
           console.log(res.data.data)
-          that.dataList = res.data.data
-          Object.keys(that.dataList).forEach(key=>{
+          this.dataList1 = res.data.data
+          Object.keys(this.dataList1).forEach(key=>{
             let filterList = {
-              text:that.dataList[key],
-              value:that.dataList[key]
+              text:this.dataList1[key],
+              value:this.dataList1[key]
             }
-            that.columns[3].filters.push(filterList)
+            this.columns[3].filters.push(filterList)
           })
         }
       })
@@ -333,7 +333,7 @@ export default {
   filters:{
     noticeWayFun(way){
       if(way == 0){
-         return '短信'
+        return '短信'
       }
       else if(way == 1){
         return '邮件'

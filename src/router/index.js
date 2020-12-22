@@ -6,9 +6,14 @@ export default new Router({
   mode:"history",
   routes: [
     {
+      path: '/',
+      redirect: '/login'
+    },
+    {
       path: '/login',
       name: 'login',
-      component:resolve => require(['@/components/login'],resolve),
+      //component:resolve => require(['@/components/login'],resolve),
+      component: () => import('@/components/login')
     },
     {
       path: '/detail',

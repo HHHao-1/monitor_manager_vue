@@ -11,24 +11,26 @@
         style="padding: 8px"
       >
         <div >
-        <a-input
-          style="width: 188px; margin-bottom: 8px; display: block;left:80px"
-          placeholder="Search Name"
-          v-model="searchName1"
-        />
-        <a-button
-          type="primary"
-          icon="search"
-          size="small"
-          style="width: 90px; margin-right: 8px;left:80px"
-          @click="searchNameAjax"
-        >
-          Search
-        </a-button>
-        <a-button size="small" style="width: 90px;left:80px" @click="reset">
-          Reset
-        </a-button>
-      </div>
+          <a-input
+            style="width: 188px; margin-bottom: 8px; display: block;left:80px"
+            placeholder="Search Name"
+            v-model="searchName1"
+            @pressEnter="searchNameAjax"
+            id="searchInput1"
+          />
+          <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px;left:80px"
+            @click="searchNameAjax"
+          >
+            Search
+          </a-button>
+          <a-button size="small" style="width: 90px;left:80px" @click="reset">
+            Reset
+          </a-button>
+        </div>
 
       </div>
 
@@ -42,6 +44,8 @@
           style="width: 188px; margin-bottom: 8px; display: block;"
           placeholder="Search Event"
           v-model="searchEvent1"
+          id="searchInput2"
+          @pressEnter="searchEventAjax"
         />
         <a-button
           type="primary"
@@ -114,22 +118,36 @@
             <td>
               <p class="tmP">
                 <a-form-item label="监控用户">
-                  <a-select style="width: 170px"  placeholder="请选择" v-model="uploadData.userName" v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]">
-                    <a-select-option v-for="(item,i) in unique(searchNameList)" :value="item" :key="i">
-                      {{item}}
-                    </a-select-option>
-                  </a-select>
+                <a-select
+                  show-search
+                  placeholder="请选择"
+                  option-filter-prop="children"
+                  style="width: 170px"
+                  :filter-option="filterOption"
+                  @focus="handleFocus"
+                  @blur="handleBlur"
+                  @change="handleChange"
+                  v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]"
+                >
+                  <a-select-option v-for="(item,i) in unique(searchNameList)" :value="item" :key="i">
+                    {{item}}
+                  </a-select-option>
+                </a-select>
                 </a-form-item>
               </p>
+              <!--<p class="tmP">
+                <a-form-item label="监控用户">
+                  <a-select style="width: 170px"  placeholder="请选择" v-model="uploadData.userName" v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]">
+
+                  </a-select>
+                </a-form-item>
+              </p>-->
             </td>
             <td rowspan="2"  >
-              <a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
+              <!--&nbsp;<a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
               <br> &nbsp;
               <a-button  style="background-color: #1585ff; color: white;margin-top: 7px" @click="searchN"><a-icon type="search" />Search</a-button>
-              <a-button style="width: 90px" @click="resetButton">reset </a-button>
-
-
-
+              <a-button style="width: 90px" @click="resetButton">reset </a-button>-->
             </td>
           </tr>
           <tr>
@@ -213,11 +231,11 @@
 
                   style="width: 250px; margin-right: 8px"
                 />
-               <!-- <a-input
-                  v-model="dataObj.address[index]"
-                  placeholder="请输入地址"
-                  style="width: 250px; margin-right: 8px"
-                />-->
+                <!-- <a-input
+                   v-model="dataObj.address[index]"
+                   placeholder="请输入地址"
+                   style="width: 250px; margin-right: 8px"
+                 />-->
                 --
                 <a-input
                   v-decorator="[
@@ -296,8 +314,18 @@
             <td>
               <p class="tmP">
                 <a-form-item label="监控用户">
-                  <a-select style="width: 170px"  placeholder="请选择" v-model="dataObj1.userName"  v-decorator="['userName',{ rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]">
-                    <a-select-option v-for="(item,i) in unique(searchNameList)" :value="item" :key="i" >
+                  <a-select
+                    show-search
+                    placeholder="请选择"
+                    option-filter-prop="children"
+                    style="width: 170px"
+                    :filter-option="filterOption"
+                    @focus="handleFocus"
+                    @blur="handleBlur"
+                    @change="handleChange"
+                    v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]"
+                  >
+                    <a-select-option v-for="(item,i) in unique(searchNameList)" :value="item" :key="i">
                       {{item}}
                     </a-select-option>
                   </a-select>
@@ -305,10 +333,10 @@
               </p>
             </td>
             <td rowspan="2" >
-              <a-input placeholder="Search name" v-model="searchVal"></a-input>
+               <!--&nbsp;<a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
               <br> &nbsp;
-              <a-button  style="background-color: #1585ff; color: white;margin-top: 7px" @click="searchN"><a-icon type="search" />Search</a-button>
-              <a-button style="width: 90px" @click="resetButton">reset </a-button>
+              <a-button  style="background-color: #1585ff; color: white;margin-top: 7px;" @click="searchN"><a-icon type="search" />Search</a-button>
+              <a-button style="width: 90px" @click="resetButton">reset </a-button>-->
             </td>
           </tr>
           <tr>
@@ -328,7 +356,7 @@
               <br><br>
             </td>
             <td>
-              <a-checkbox-group  v-model="dataObj1.notice" >
+              <a-checkbox-group  v-model="notice" >
                 <a-row>
                   <a-checkbox value="0">短信</a-checkbox>
                   <a-checkbox value="1">邮件</a-checkbox>
@@ -388,6 +416,7 @@
                   placeholder="请输入地址"
                   style="width: 250px; margin-right: 8px"
                   v-model="dataObj1.address[index]"
+                  @change="validataAddr1"
                 />
                 --
                 <a-input
@@ -401,7 +430,7 @@
                   v-model="dataObj1.monitorMinVal[index]"
                   style="width: 150px; margin-right: 8px"
                 />
-                <!--右侧的图标-->
+                <!--编辑右侧的图标-->
                 <!--<a-icon
                   v-if="editForm.getFieldValue('keys1').length > 0"
                   class="dynamic-delete-button"
@@ -410,6 +439,7 @@
                   @click="() => remove1(k)"
                 />-->
               </a-form-item>
+              <div class="va" id="va">请输入地址</div>
               <a-form-item v-if="false" v-bind="formItemLayoutWithOutLabel" style="width: 800px">
                 <a-button type="dashed" style="width: 147%" @click="add1">
                   <a-icon type="plus" /> 添加
@@ -446,6 +476,7 @@ let id = 0;
 export default {
   data() {
     return {
+      isValidata1:false,
       isShow1:true,
       dataList2:[],
       isName:false,
@@ -525,7 +556,9 @@ export default {
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                this.searchInput.focus();
+                const input = document.getElementById("searchInput1")
+                input.focus()
+               // this.searchInput.focus();
               }, 0);
             }
           },
@@ -547,7 +580,9 @@ export default {
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                this.searchInput.focus();
+                const input = document.getElementById("searchInput2")
+                input.focus()
+                //this.searchInput.focus();
               }, 0);
             }
           },
@@ -612,6 +647,23 @@ export default {
     })*/
   },
   methods: {
+    validataAddr1(){
+      for(let i=0;i<this.dataObj1.address.length;i++) {
+        console.log(this.dataObj1.address[i])
+        if (this.dataObj1.address[i]=="") {
+          setTimeout(function () {
+            document.getElementById("va").style.color = "red";
+          }, 0);
+          this.isValidata1=true;
+        }
+        else  {
+          setTimeout(function () {
+            document.getElementById("va").style.color = "white";
+          },0);
+          this.isValidata1=false;
+        }
+      }
+    },
     searchNameAjax(){
       this.isName = true
       this.$ajax({
@@ -753,7 +805,7 @@ export default {
       }
       for (let i = 0; i <this.dataObj.coinKind.length ; i++) {
         list.push(new obj(
-          this.uploadData.userName,
+          this.form.getFieldValue('userName'),
           this.uploadData.eventName,
           notice.toString(),
           this.dataObj.coinKind[i],
@@ -800,34 +852,34 @@ export default {
         }
       }
       let notice=0
-      let mid=this.dataObj1.notice
+      let mid=this.notice
       let length = mid.length
       switch(length){
         case 1:
-          this.dataObj1.notice = Number(mid[0]);
+          this.notice = Number(mid[0]);
           break
         case 2:
           switch (Number(mid[0])+Number(mid[1])){
             case 1:
-              this.dataObj1.notice=3
+              this.notice=3
               break
             case 2:
-              this.dataObj1.notice = 4
+              this.notice = 4
               break
             case 3:
-              this.dataObj1.notice = 5
+              this.notice = 5
               break
           }
           break
         case 3:
-          this.dataObj1.notice = 6
+          this.notice = 6
           break
       }
       for (let i = 0; i <this.dataObj1.coinKind.length ; i++) {
         list.push(new obj(this.dataObj1.id,
           this.dataObj1.userName,
           this.dataObj1.eventName,
-          this.dataObj1.notice,
+          this.notice,
           this.dataObj1.coinKind[i],
           this.dataObj1.address[i],
           this.dataObj1.addressMark[i],
@@ -849,18 +901,17 @@ export default {
     },
 
     searchAddressInfo(){
-      let that = this;
-      that.$ajax({
+      this.$ajax({
         method:"get",
         url:'/monitor/admin/users/list',
       }).then(res=>{
         if(res.data.code=='1001'){
-          that.dataList2 = res.data.data.data;
-          Object.keys(that.dataList2).forEach(key=>{
-            let name = that.dataList2[key].name
-           // let coinKind = that.dataList[key].coinKind
-            that.searchNameList.push(name)
-           // that.searchCoinList.push(coinKind)
+          this.dataList2 = res.data.data.data;
+          Object.keys(this.dataList2).forEach(key=>{
+            let name = this.dataList2[key].name
+            // let coinKind = that.dataList[key].coinKind
+            this.searchNameList.push(name)
+            // that.searchCoinList.push(coinKind)
           })
         }
       })
@@ -875,25 +926,13 @@ export default {
         }
       })
     },
-
-    /* searchIdByName(){
-       let that = this;
-       that.$ajax({
-         method:"get",
-         url:'/monitor/admin/addr-rules/search',
-         data:{
-           name:that.uploadData.name
-         }
-       }).then(res=>{
-         if(res.data.code=='1001'){
-         this.searchName=res.data.data
-         }
-       })
-     },*/
     unique(array) {
       return Array.from(new Set(array));
     },
     edit(id,name,eventName,noticeWay,address,coinKind,addressMark,monitorMinVal){
+      setTimeout(function () {
+        document.getElementById("va").style.color = "white";
+      },0);
       const { editForm } = this;
       const keys1 = editForm.getFieldValue('keys1');
       editForm.setFieldsValue({
@@ -904,35 +943,34 @@ export default {
       this.dataObj1.id = id;
       this.dataObj1.userName = name;
       this.dataObj1.eventName= eventName;
-      switch(noticeWay){
-        case 0:
-          this.dataObj1.notice = ['0']
-              break
-        case 1:
-          this.dataObj1.notice = ['1']
-              break
-        case 2:
-          this.dataObj1.notice = ['2']
-              break
-        case 3:
-          this.dataObj1.notice= ['0','1']
-              break
-        case 4:
-          this.dataObj1.notice=['0','2']
-              break
-        case 5:
-          this.dataObj1.notice=['1','2']
-              break
-        case 6:
-          this.dataObj1.notice=['0','1','2']
-              break
-      }
       this.dataObj1.coinKind[0]=coinKind
-      console.log('12321142357777')
-      console.log(this.dataObj1.coinKind[0])
       this.dataObj1.address[0]=address;
       this.dataObj1.addressMark[0]=addressMark ;
       this.dataObj1.monitorMinVal[0]=monitorMinVal;
+      switch(noticeWay){
+        case 0:
+          this.notice = ['0']
+          break
+        case 1:
+          this.notice = ['1']
+          break
+        case 2:
+          this.notice = ['2']
+          break
+        case 3:
+          this.notice= ['0','1']
+          break
+        case 4:
+          this.notice=['0','2']
+          break
+        case 5:
+          this.notice=['1','2']
+          break
+        case 6:
+          this.notice=['0','1','2']
+          break
+      }
+
       this.add1();
       this.editVisible = true;
       this.$nextTick(_ => {
@@ -940,7 +978,6 @@ export default {
       })
 
     },
-
     startUse(id){
       let that = this;
       that.$ajax({
@@ -997,7 +1034,6 @@ export default {
         keys: keys.filter(key => key !== k),
       });
     },
-
     remove1(k) {
       const { editForm } = this;
       // can use data-binding to get
@@ -1021,7 +1057,6 @@ export default {
         keys: nextKeys,
       });
     },
-
     add1() {
       const { editForm } = this;
       const keys1 = editForm.getFieldValue('keys1');
@@ -1040,10 +1075,7 @@ export default {
 
         }
       })
-
-      this.$router.replace({name:'addressMonitor'});
-
-
+     // this.$router.replace({name:'addressMonitor'});
     },
     cancelClick(){
       const { form } = this;
@@ -1067,13 +1099,14 @@ export default {
     editHandleOk(e){
       e.preventDefault();
       this.editForm.validateFields(err=>{
-        if(!err){
+        if(!err && (this.isValidata1==false)){
           this.editVisible=false;
           this.editDataList1();
           this.getDataList();
-
         }
-
+        else{
+          alert('请完善信息')
+        }
       })
     },
     editCancelClick(){
@@ -1098,12 +1131,13 @@ export default {
       this.searchAddressInfo();
       this.searchCoinListFun();
       this.add()
-
       this.uploadData = {
         userName:'',
         eventName:'',
         coinKind:'',
+        noticeWay: [],
       }
+
       this.$nextTick(_ => {
         this.form.setFieldsValue(this.uploadData)
       })
@@ -1143,6 +1177,20 @@ export default {
       console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getDataList();
+    },
+    handleChange(value) {
+      console.log(`selected ${value}`);
+    },
+    handleBlur() {
+      console.log('blur');
+    },
+    handleFocus() {
+      console.log('focus');
+    },
+    filterOption(input, option) {
+      return (
+        option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      );
     },
   },
   filters:{
@@ -1204,6 +1252,11 @@ export default {
 }
 .ant-form-item{
   margin-bottom: 0px;
+}
+.va{
+  color:white;
+  margin-left: 190px;
+
 }
 </style>
 
