@@ -11,24 +11,26 @@
         style="padding: 8px"
       >
         <div >
-        <a-input
-          style="width: 188px; margin-bottom: 8px; display: block;left:80px"
-          placeholder="Search Name"
-          v-model="searchName1"
-        />
-        <a-button
-          type="primary"
-          icon="search"
-          size="small"
-          style="width: 90px; margin-right: 8px;left:80px"
-          @click="searchNameAjax"
-        >
-          Search
-        </a-button>
-        <a-button size="small" style="width: 90px;left:80px" @click="reset">
-          Reset
-        </a-button>
-      </div>
+          <a-input
+            style="width: 188px; margin-bottom: 8px; display: block;left:80px"
+            placeholder="Search Name"
+            v-model="searchName1"
+            @pressEnter="searchNameAjax"
+            id="searchInput1"
+          />
+          <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px;left:80px"
+            @click="searchNameAjax"
+          >
+            Search
+          </a-button>
+          <a-button size="small" style="width: 90px;left:80px" @click="reset">
+            Reset
+          </a-button>
+        </div>
 
       </div>
 
@@ -42,6 +44,8 @@
           style="width: 188px; margin-bottom: 8px; display: block;"
           placeholder="Search Event"
           v-model="searchEvent1"
+          id="searchInput2"
+          @pressEnter="searchEventAjax"
         />
         <a-button
           type="primary"
@@ -123,7 +127,7 @@
               </p>
             </td>
             <td rowspan="2"  >
-              <a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
+              &nbsp;<a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
               <br> &nbsp;
               <a-button  style="background-color: #1585ff; color: white;margin-top: 7px" @click="searchN"><a-icon type="search" />Search</a-button>
               <a-button style="width: 90px" @click="resetButton">reset </a-button>
@@ -213,11 +217,11 @@
 
                   style="width: 250px; margin-right: 8px"
                 />
-               <!-- <a-input
-                  v-model="dataObj.address[index]"
-                  placeholder="请输入地址"
-                  style="width: 250px; margin-right: 8px"
-                />-->
+                <!-- <a-input
+                   v-model="dataObj.address[index]"
+                   placeholder="请输入地址"
+                   style="width: 250px; margin-right: 8px"
+                 />-->
                 --
                 <a-input
                   v-decorator="[
@@ -305,9 +309,9 @@
               </p>
             </td>
             <td rowspan="2" >
-              <a-input placeholder="Search name" v-model="searchVal"></a-input>
+               &nbsp;<a-input placeholder="Search name" style="width: 200px" v-model="searchVal"></a-input>
               <br> &nbsp;
-              <a-button  style="background-color: #1585ff; color: white;margin-top: 7px" @click="searchN"><a-icon type="search" />Search</a-button>
+              <a-button  style="background-color: #1585ff; color: white;margin-top: 7px;" @click="searchN"><a-icon type="search" />Search</a-button>
               <a-button style="width: 90px" @click="resetButton">reset </a-button>
             </td>
           </tr>
@@ -328,7 +332,7 @@
               <br><br>
             </td>
             <td>
-              <a-checkbox-group  v-model="dataObj1.notice" >
+              <a-checkbox-group  v-model="notice" >
                 <a-row>
                   <a-checkbox value="0">短信</a-checkbox>
                   <a-checkbox value="1">邮件</a-checkbox>
@@ -525,7 +529,9 @@ export default {
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                this.searchInput.focus();
+                const input = document.getElementById("searchInput1")
+                input.focus()
+               // this.searchInput.focus();
               }, 0);
             }
           },
@@ -547,7 +553,9 @@ export default {
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                this.searchInput.focus();
+                const input = document.getElementById("searchInput2")
+                input.focus()
+                //this.searchInput.focus();
               }, 0);
             }
           },
@@ -800,34 +808,34 @@ export default {
         }
       }
       let notice=0
-      let mid=this.dataObj1.notice
+      let mid=this.notice
       let length = mid.length
       switch(length){
         case 1:
-          this.dataObj1.notice = Number(mid[0]);
+          this.notice = Number(mid[0]);
           break
         case 2:
           switch (Number(mid[0])+Number(mid[1])){
             case 1:
-              this.dataObj1.notice=3
+              this.notice=3
               break
             case 2:
-              this.dataObj1.notice = 4
+              this.notice = 4
               break
             case 3:
-              this.dataObj1.notice = 5
+              this.notice = 5
               break
           }
           break
         case 3:
-          this.dataObj1.notice = 6
+          this.notice = 6
           break
       }
       for (let i = 0; i <this.dataObj1.coinKind.length ; i++) {
         list.push(new obj(this.dataObj1.id,
           this.dataObj1.userName,
           this.dataObj1.eventName,
-          this.dataObj1.notice,
+          this.notice,
           this.dataObj1.coinKind[i],
           this.dataObj1.address[i],
           this.dataObj1.addressMark[i],
@@ -858,9 +866,9 @@ export default {
           that.dataList2 = res.data.data.data;
           Object.keys(that.dataList2).forEach(key=>{
             let name = that.dataList2[key].name
-           // let coinKind = that.dataList[key].coinKind
+            // let coinKind = that.dataList[key].coinKind
             that.searchNameList.push(name)
-           // that.searchCoinList.push(coinKind)
+            // that.searchCoinList.push(coinKind)
           })
         }
       })
@@ -904,35 +912,34 @@ export default {
       this.dataObj1.id = id;
       this.dataObj1.userName = name;
       this.dataObj1.eventName= eventName;
-      switch(noticeWay){
-        case 0:
-          this.dataObj1.notice = ['0']
-              break
-        case 1:
-          this.dataObj1.notice = ['1']
-              break
-        case 2:
-          this.dataObj1.notice = ['2']
-              break
-        case 3:
-          this.dataObj1.notice= ['0','1']
-              break
-        case 4:
-          this.dataObj1.notice=['0','2']
-              break
-        case 5:
-          this.dataObj1.notice=['1','2']
-              break
-        case 6:
-          this.dataObj1.notice=['0','1','2']
-              break
-      }
       this.dataObj1.coinKind[0]=coinKind
-      console.log('12321142357777')
-      console.log(this.dataObj1.coinKind[0])
       this.dataObj1.address[0]=address;
       this.dataObj1.addressMark[0]=addressMark ;
       this.dataObj1.monitorMinVal[0]=monitorMinVal;
+      switch(noticeWay){
+        case 0:
+          this.notice = ['0']
+          break
+        case 1:
+          this.notice = ['1']
+          break
+        case 2:
+          this.notice = ['2']
+          break
+        case 3:
+          this.notice= ['0','1']
+          break
+        case 4:
+          this.notice=['0','2']
+          break
+        case 5:
+          this.notice=['1','2']
+          break
+        case 6:
+          this.notice=['0','1','2']
+          break
+      }
+
       this.add1();
       this.editVisible = true;
       this.$nextTick(_ => {
@@ -1071,9 +1078,7 @@ export default {
           this.editVisible=false;
           this.editDataList1();
           this.getDataList();
-
         }
-
       })
     },
     editCancelClick(){
@@ -1098,12 +1103,13 @@ export default {
       this.searchAddressInfo();
       this.searchCoinListFun();
       this.add()
-
       this.uploadData = {
         userName:'',
         eventName:'',
         coinKind:'',
+        noticeWay: [],
       }
+
       this.$nextTick(_ => {
         this.form.setFieldsValue(this.uploadData)
       })

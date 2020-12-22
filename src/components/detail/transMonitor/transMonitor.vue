@@ -34,6 +34,8 @@
           style="width: 188px; margin-bottom: 8px; display: block;left: 70px"
           v-model="searchName1"
           placeholder="Search Name"
+          id="searchInput"
+          @pressEnter="searchNameAjax"
         />
         <a-button
           type="primary"
@@ -84,7 +86,7 @@
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
         <a  @click="gotoLog">提醒日志</a>
-<!--{{text.id}}{{text.coinKind}}{{text.monitorMinVal}}{{text.name}}{{text.coinKind}}-->
+        <!--{{text.id}}{{text.coinKind}}{{text.monitorMinVal}}{{text.name}}{{text.coinKind}}-->
       </span>
       <span slot="noticeWay" slot-scope="way">
       {{way | noticeWayFun}}
@@ -309,7 +311,9 @@ export default {
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                this.searchInput.focus();
+                const input = document.getElementById("searchInput")
+                input.focus()
+               // this.searchInput.focus();
               }, 0);
             }
           },
@@ -431,7 +435,7 @@ export default {
         }
       })
     },
-            //监控用户的下拉列表查询方法
+    //监控用户的下拉列表查询方法
     searchUserName(){
       this.$ajax({
         method:"get",
@@ -449,15 +453,15 @@ export default {
           this.dataList1= res.data.data.data
           Object.keys(this.dataList1).forEach(key=>{
             let name = this.dataList1[key].name
-           // let coin = this.dataList1[key].coinKind
+            // let coin = this.dataList1[key].coinKind
             this.userList.push(name)
-           // this.coinList.push(coin)
+            // this.coinList.push(coin)
 
           })
         }
       })
     },
-          //币种下拉查询
+    //币种下拉查询
     searchCoin(){
       let that = this;
       that.$ajax({
@@ -476,7 +480,7 @@ export default {
         }
       })
     },
-          //添加
+    //添加
     addTransDataList(){
       let notice=0
       let mid=this.uploadData.noticeWay
@@ -534,7 +538,7 @@ export default {
       })
 
     },
-          // 修改
+    // 修改
     updataList(){
       let notice=0
       console.log(this.uploadData2.noticeWay)
@@ -645,11 +649,11 @@ export default {
         }
       }).then(res=>{
         if(res.data.code == "1001"){
-        //  that.$message.success(res.data.msg);
+          //  that.$message.success(res.data.msg);
           alert('成功重新启用此用户')
           that.getDataList();
         }else {
-        //  that.$message.error(res.data.msg)
+          //  that.$message.error(res.data.msg)
           alert('启用此用户失败')
           that.getDataList();
 
@@ -667,11 +671,11 @@ export default {
         }
       }).then(res=>{
         if(res.data.code == "1001"){
-         // that.$message.success(res.data.msg);
+          // that.$message.success(res.data.msg);
           alert('成功禁用此用户')
           that.getDataList();
         }else {
-         // that.$message.error(res.data.msg)
+          // that.$message.error(res.data.msg)
           alert('禁用此用户失败')
           that.getDataList();
 

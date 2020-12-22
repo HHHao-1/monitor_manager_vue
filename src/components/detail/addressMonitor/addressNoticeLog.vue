@@ -36,6 +36,8 @@
             style="width: 188px; margin-bottom: 8px; display: block;left:80px"
             placeholder="Search EventName"
             v-model="searchEvent"
+            @pressEnter="searchEventAjax"
+            id="searchInput"
           />
           <a-button
             type="primary"
@@ -81,9 +83,9 @@
         {{way | noticeWayFun}}
       </span>
       <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
-        提醒内容:<br>
-        1.交易哈希：{{record.transHash}}<br>
-        2.异动时间：{{record.unusualTime}}
+        提醒内容:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        交易哈希：[{{record.transHash}}]   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        异动时间：[{{record.unusualTime}}]
       </p>
     </a-table>
     <div class="page">
@@ -101,41 +103,6 @@
 </template>
 
 <script>
-const data = [
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:1,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:2,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:40,
-    noticeWay:3,
-    addTime:'2020-10-01',
-    state:0,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:60,
-    noticeWay:4,
-    addTime:'2020-10-01',
-    state:0,
-  },
-];
-
 export default {
   data() {
     return {
@@ -146,7 +113,6 @@ export default {
       pageSize:8,
       total:500,
       pageNt:['8','10','20','30'],
-      data,
       searchText: '',
       searchInput: null,
       searchedColumn: '',
@@ -184,7 +150,9 @@ export default {
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                this.searchInput.focus();
+                const input = document.getElementById('searchInput')
+                input.focus()
+               // this.searchInput.focus();
               }, 0);
             }
           },
@@ -315,7 +283,7 @@ export default {
               text:that.dataList[key],
               value:that.dataList[key]
             }
-            that.columns[3].filters.push(filterList)
+            //that.columns[3].filters.push(filterList)
           })
         }
       })
@@ -324,7 +292,7 @@ export default {
   filters:{
     noticeWayFun(way){
       if(way==0){
-         return '短信'
+        return '短信'
       }
       else if(way == 1){
         return '邮件'

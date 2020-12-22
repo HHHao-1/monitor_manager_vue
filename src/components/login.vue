@@ -63,7 +63,7 @@ export default {
       var obj = DDLogin({id: "login_container", goto: goto, style: "border:none;", width: "365", height: "400"});
       var handleMessage = function (event) {
         var origin = event.origin;
-        console.log("origin", event.origin);
+        // console.log("origin", event.origin);
         if (origin == "https://login.dingtalk.com") {
           var loginTmpCode = event.data;
           axios({
@@ -71,19 +71,17 @@ export default {
             url: "https://bifrost.chaindigg.com/connect/oauth2/sns_authorize?appid=dingoazcm5jegnjk78as0f&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=REDIRECT_URI&loginTmpCode=" + loginTmpCode,
           }).then(res => {
             if (res.data.code == 0) {
-              console.log(res.data.data)
-              console.log(res)
               axios({
                 method: 'get',
                 url: "/monitor/admin/ding/login?code=" + res.data.data + "&state=monitor",
               }).then(res => {
                 // 表示接口调用成功
-                console.log(res.data)
                 let loginData = res.data.data.users[0].permission;
                 if (loginData.apply === 0) {
                   that.$router.push('/userMonitor')
                   // 1表示登陆成功
                   sessionStorage.setItem("login","1")
+                  sessionStorage.setItem("name",res.data.data.users[0].name)
                 } else if (loginData.apply == 1) {
                   that.tmshow = 2
                   axios({

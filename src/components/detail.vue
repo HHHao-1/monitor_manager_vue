@@ -72,7 +72,7 @@
     </a-layout-sider>
     <a-layout>
       <a-layout-header :style="{ background: '#fff', padding: 0 ,textAlign:'right',paddingRight:'20px'}">   <!--这是顶部栏-->
-        <span>momo.xyz{{user}}</span>  <!--这里是显示哪个用户momo.xyz-->
+        <span>{{user}}</span>  <!--这里是显示哪个用户momo.xyz-->
         <span style="font-size: 12px;margin-left: 1rem;color: #1585ff;
     text-decoration: underline;cursor: pointer" @click="showDeleteConfirm">退出</span>
       </a-layout-header>
@@ -152,7 +152,7 @@
             },
           ],
 
-          user:this.$Cookies.get('user'),
+          user:sessionStorage.getItem('name'),
           selectedKeys:['dataRecord'],
           inlineCollapsed:true
         }
@@ -184,7 +184,7 @@
             okType: 'danger',
             cancelText: 'No',
             onOk() {
-              that.$router.push('/login')
+              that.$router.push('/')
               location.reload()
               // 0表示未登录
               sessionStorage.setItem("login","0")

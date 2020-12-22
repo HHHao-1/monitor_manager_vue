@@ -62,9 +62,9 @@
         {{way | noticeWayFun}}
       </span>
       <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
-        提醒内容:<br>
-        1.交易哈希：{{record.transHash}}<br>
-        2.异动时间：{{record.unusualTime}}
+        提醒内容:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        交易哈希：[{{record.transHash}}]   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        异动时间：[{{record.unusualTime}}]
       </p>
     </a-table>
     <div class="page">
@@ -161,7 +161,7 @@ export default {
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                this.searchInput.focus();
+              //  this.searchInput.focus();
               }, 0);
             }
           },
@@ -266,7 +266,7 @@ export default {
   filters:{
     noticeWayFun(way){
       if(way==0){
-         return '短信'
+        return '短信'
       }
       else if(way == 1){
         return '邮件'
