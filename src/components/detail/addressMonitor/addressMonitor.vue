@@ -186,6 +186,7 @@
                 :required="false"
 
               >
+                <div>
                 <a-select
                   v-decorator="[
                   `coinKind[${k}]`,
@@ -224,7 +225,8 @@
                       },
                     ]"
                   placeholder="请输入地址"
-
+                  @change="validataAddr2"
+                  @blur="validataAddr2"
                   style="width: 250px; margin-right: 8px"
                 />
                 <!-- <a-input
@@ -237,33 +239,20 @@
                   v-decorator="[
                      `aMark[${k}]`,
                       {
-                        validateTrigger: ['change', 'blur'],
-                        rules: [
-                          {
-                            required: true,
-                            whitespace: true,
-                            message: '请输入地址',
-                          },
-                        ],
+
                       },
                     ]"
                   placeholder="请输入地址标注"
                   v-model="dataObj.addressMark[index]"
                   style="width: 150px; margin-right: 8px"
+
                 />
                 --
                 <a-input
                   v-decorator="[
                      `min[${k}]`,
                       {
-                        validateTrigger: ['change', 'blur'],
-                        rules: [
-                          {
-                            required: true,
-                            whitespace: true,
-                            message: '请输入地址',
-                          },
-                        ],
+
                       },
                     ]"
                   placeholder="请输入监控阈值"
@@ -277,8 +266,11 @@
                   :disabled="form.getFieldValue('keys').length === 0"
                   @click="() => remove(k)"
                 />
+                </div>
+                <div class="va2" :name="va2">请输入地址</div>
               </a-form-item>
               <br>
+
               <a-form-item v-bind="formItemLayoutWithOutLabel">
                 <a-button type="dashed" style="width: 118%" @click="add">
                   <a-icon type="plus" /> 添加
@@ -367,7 +359,6 @@
                 v-for="(k, index) in editForm.getFieldValue('keys1')"
                 :key="k"
                 :required="false"
-
               >
                 <a-select
                   v-decorator="[
@@ -470,7 +461,9 @@ let id = 0;
 export default {
   data() {
     return {
+      va2:[],
       isValidata1:false,
+      isValidata2:false,
       isShow1:true,
       dataList2:[],
       isName:false,
@@ -655,6 +648,25 @@ export default {
             document.getElementById("va").style.color = "white";
           },0);
           this.isValidata1=false;
+        }
+      }
+    },
+    validataAddr2(){
+      let temp=[];
+      for(let i=0;i<this.dataObj.address.length;i++) {
+        if (this.dataObj.address[i]=="") {
+          temp[i]=document.getElementsByName(this.va2)[i];
+          setTimeout(function () {
+            temp[i].style.display="block"
+          }, 0);
+          this.isValidata2=true;
+        }
+        else  {
+          temp[i]=document.getElementsByName(this.va2)[i];
+          setTimeout(function () {
+            temp[i].style.display="none"
+          }, 0);
+          this.isValidata2=false;
         }
       }
     },
@@ -1063,11 +1075,13 @@ export default {
     handleOk(e){
       e.preventDefault();
       this.form.validateFields(err=>{
-        if(!err){
+        if(!err  && (this.isValidata2==false)){
           this.addAddressDataList();
           this.visible=false;
           this.getDataList();
-
+        }
+        else {
+          Message.error('请完善信息！')
         }
       })
      // this.$router.replace({name:'addressMonitor'});
@@ -1100,7 +1114,7 @@ export default {
           this.getDataList();
         }
         else{
-          Message.error('请完善信息')
+          Message.error('请完善信息！')
           // alert('请完善信息')
         }
       })
@@ -1252,6 +1266,13 @@ export default {
 .va{
   color:white;
   margin-left: 190px;
+
+}
+.va2{
+  color: red;
+  margin-left: 190px;
+  margin-top: -10px;
+  display: none;
 
 }
 </style>
