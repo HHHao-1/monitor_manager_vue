@@ -995,11 +995,9 @@ export default {
         }
       }).then(res=>{
         if(res.data.code == "1001"){
-          that.$message.success(res.data.msg);
           alert('成功重新启用此用户')
           that.getDataList();
         }else {
-          that.$message.error(res.data.msg)
           alert('启用此用户失败')
           that.getDataList();
 
@@ -1017,11 +1015,11 @@ export default {
         }
       }).then(res=>{
         if(res.data.code == "1001"){
-          that.$message.success(res.data.msg);
+          //that.$message.success(res.data.msg);
           alert('成功禁用此用户')
           that.getDataList();
         }else {
-          that.$message.error(res.data.msg)
+          //that.$message.error(res.data.msg)
           alert('禁用此用户失败')
           that.getDataList();
 
@@ -1043,14 +1041,10 @@ export default {
     },
     remove1(k) {
       const { editForm } = this;
-      // can use data-binding to get
       const keys1 = editForm.getFieldValue('keys1');
-      // We need at least one passenger
       if (keys1.length === 0) {
         return;
       }
-
-      // can use data-binding to set
       editForm.setFieldsValue({
         keys1: keys1.filter(key => key !== k),
       });
@@ -1084,7 +1078,6 @@ export default {
           Message.error('请完善信息！')
         }
       })
-     // this.$router.replace({name:'addressMonitor'});
     },
     cancelClick(){
       const { form } = this;
@@ -1100,9 +1093,6 @@ export default {
       for(let i=0;i<this.dataObj.monitorMinVal.length;i++) {
         this.dataObj.monitorMinVal[i] = '';
       }
-
-
-
     },
 
     editHandleOk(e){
