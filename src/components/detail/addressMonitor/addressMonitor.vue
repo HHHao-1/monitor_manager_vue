@@ -464,6 +464,8 @@
 </template>
 
 <script>
+  import { Message } from 'element-ui'
+
 let id = 0;
 export default {
   data() {
@@ -1098,8 +1100,8 @@ export default {
           this.getDataList();
         }
         else{
-          // TODO 使用element ui 提示
-          alert('请完善信息')
+          Message.error('请完善信息')
+          // alert('请完善信息')
         }
       })
     },

@@ -13,7 +13,7 @@ window.jQuery = $;
 window.$ = $;
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-import { Button, Select ,Input,Form,FormItem,DatePicker,Upload, Message} from 'element-ui';
+import { Button, Select ,Input,Form,FormItem,DatePicker,Upload} from 'element-ui';
 
 
 Vue.config.productionTip = false
@@ -26,7 +26,7 @@ Vue.use(FormItem)
 Vue.use(Antd);
 Vue.use(DatePicker);
 Vue.use(Upload);
-Vue.use(Message)
+
 // Vue.use(ElementUI);
 /* eslint-disable no-new */
 
