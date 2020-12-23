@@ -245,7 +245,6 @@ const data = [
 
 export default {
   data() {
-
     return {
       isMonitorName:false,
       id:0,

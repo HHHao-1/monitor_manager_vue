@@ -101,7 +101,7 @@
   </div>
 </template>
 <script>
-const columns = [
+/*const columns = [
   {
     title: '主链',
     dataIndex: 'mainChain',
@@ -134,14 +134,14 @@ const columns = [
       customRender: 'action',
     }
   },
-];
+];*/
 
 
 export default {
   data() {
     return {
       dataList1:[],
-      columns,
+
       pagination:false,
       currentPage:1,
       pageSize:8,
@@ -149,7 +149,9 @@ export default {
       pageNt:['8','10','20','30'],
       dataList:[],
       mainChainList:[],
-      coinKindList:[],
+
+      mainChainList2:[],
+      coinKindNameList:[],
       editVisible:false,
       deleteVisible:false,
       form: this.$form.createForm(this, { name: 'coordinated' }),
@@ -164,7 +166,42 @@ export default {
         mainChain:"",
         point:""
       },
-      oldUploadData: {}
+      oldUploadData: {},
+      columns:[
+        {
+          title: '主链',
+          dataIndex: 'mainChain',
+          key: 'mainChain',
+          filters:[],
+          onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
+        },
+        {
+          title: '币种名称',
+          dataIndex: 'coinName',
+          key: 'coinName',
+          filters: [],
+          onFilter: (value, record) => record.coinName.indexOf(value) === 0,
+        },
+        {
+          title: '合约地址',
+          dataIndex: 'contractAddr',
+          key: 'contractAddr',
+        },
+        {
+          title: '小数位',
+          dataIndex: 'point',
+          key: 'point',
+        },
+        {
+          title: '操作',
+          dataIndex: '',
+          key: 'action',
+          scopedSlots: {
+            customRender: 'action',
+          }
+        },
+      ]
+
     };
   },
 
@@ -194,11 +231,11 @@ export default {
       }).then(res=>{
         console.log(res)
         if(res.data.code == '1001'){
-          this.columns[0].filters = []
-          this.columns[1].filters = []
+         // this.columns[0].filters = []
+         // this.columns[1].filters = []
           this.dataList = res.data.data.data
           this.total=res.data.data.total
-          Object.keys(this.dataList).forEach(key=>{
+          /*Object.keys(this.dataList).forEach(key=>{
             let filterList = {
               text:this.dataList[key].mainChain,
               value:this.dataList[key].mainChain
@@ -211,71 +248,23 @@ export default {
               value:this.dataList[key].coinName
             }
             this.columns[1].filters.push(filterList)
-          })
+          })*/
         }
       })
     },
-
-    /*searchCoinFilter(){
-      this.$ajax({
-        method:"get",
-        url:'/monitor/admin/coinlist',
-      }).then(res=>{
-        console.log(res)
-        if(res.data.code == '1001'){
-          console.log('132412352435')
-          console.log(res.data.data)
-          this.dataList = res.data.data
-          Object.keys(this.dataList).forEach(key=>{
-            let filterList = {
-              text:this.dataList[key],
-              value:this.dataList[key]
-            }
-            this.columns[0].filters.push(filterList)
-          })
-        }
-      })
-    },
-    searchCoinFilter2(){
-      this.$ajax({
-        method:"get",
-        url:'/monitor/admin/coin-kinds',
-        params:{
-          event:'',
-          userName:'',
-          userId:'',
-          currentPage:this.currentPage,
-          pageSize:this.pageSize,
-        }
-      }).then(res=>{
-        console.log(res)
-        if(res.data.code == '1001'){
-          this.dataList = res.data.data
-          Object.keys(this.dataList).forEach(key=>{
-            let filterList = {
-              text:this.dataList.coinKind[key],
-              value:this.dataList.coinKind[key]
-            }
-            this.columns[1].filters.push(filterList)
-          })
-        }
-      })
-    },*/
 
     addDataList(){
-      let that = this;
-      that.$ajax({
+      this.$ajax({
         method:"post",
         url:'/monitor/admin/coin-kinds',
         params:{
-          mainChain:that.uploadData.mainChain,
-          coinName:that.uploadData.tokenName,
-          contract:that.uploadData.contractAddr,
-          point :that.uploadData.point,
+          mainChain:this.uploadData.mainChain,
+          coinName:this.uploadData.tokenName,
+          contract:this.uploadData.contractAddr,
+          point :this.uploadData.point,
         }
       }).then(res=>{
         if(res.data.code=='1001'){
-          that.$message.success(res.data.msg);
           alert('添加成功');
           this.visible=false;
           this.getDataList();
@@ -322,28 +311,69 @@ export default {
           point :point,
         }
       }).then(res=>{
-        console.log('hello13')
-        console.log(mainChain)
-        console.log('hello13')
         if(res.data.code==1001){
-          that.$message.success(res.data.msg);
           that.getDataList();
           alert('删除成功');
         }
         else {
-          that.$message.success(res.data.msg);
           alert('删除失败');
         }
       })
     },
     searchCoinInfo(){
-      let that = this;
-      that.$ajax({
+      this.$ajax({
         method:"get",
         url:'monitor/admin/coinlist',
       }).then(res=>{
         if(res.data.code==1001){
-          that.mainChainList = res.data.data;
+          this.mainChainList2 = res.data.data;
+          Object.keys(this.mainChainList2).forEach(key=>{
+            let filterList = {
+              text:this.mainChainList2[key],
+              value:this.mainChainList2[key]
+            }
+            this.columns[0].filters.push(filterList)
+          })
+        }
+      })
+    },
+    searchCoinInfo2(){
+      this.$ajax({
+        method:"get",
+        url:'monitor/admin/coinlist',
+      }).then(res=>{
+        if(res.data.code==1001){
+          this.mainChainList = res.data.data;
+          Object.keys(this.mainChainList).forEach(key=>{
+            let filterList =this.mainChainList[key]
+            this.mainChainList.push(filterList)
+          })
+        }
+      })
+    },
+    searchCoinKindNameList(){
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/coin-kinds',
+        params:{
+          event:'',
+          userName:'',
+          userId:'',
+          currentPage:this.currentPage,
+          pageSize:this.total,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.coinKindNameList = res.data.data.data
+          Object.keys(this.coinKindNameList).forEach(key=>{
+            let filterList = {
+              text:this.coinKindNameList[key].coinName,
+              value:this.coinKindNameList[key].coinName
+            }
+            this.columns[1].filters.push(filterList)
+          })
+
         }
       })
     },
@@ -382,10 +412,8 @@ export default {
 
     },
 
-    /*okType:{
-      props: {disabled: true},
-    },*/
     showModal() {
+      this.searchCoinInfo2()
       this.visible = true;
       this.searchCoinInfo();
       this.uploadData = {
@@ -399,11 +427,6 @@ export default {
       })
       //this.fileList = [];
     },
-    /*handleChange(pagination, filters, sorter) {
-      // console.log('Various parameters', pagination, filters, sorter);
-      this.filteredInfo = filters;
-      // this.sortedInfo = sorter;
-    },*/
     edit(id,mainChain,tokenName,contractAddr,point){
       this.searchCoinInfo();
       this.uploadData.id = id
@@ -434,30 +457,12 @@ export default {
       this.editVisible=false
     },
 
+
   },
   mounted() {
     this.getDataList();
-    //this.searchCoinFilter2();
-    //this.searchCoinFilter();
-
-    /*this.$ajax({
-      method:"get",
-      url:'/monitor/admin/coinlist',
-    }).then(res=>{
-      console.log(res)
-      if(res.data.code == '1001'){
-        this.dataList1 = res.data.data
-        Object.keys(this.dataList1).forEach(key=>{
-          let filterList = {
-            text:this.dataList1[key],
-            value:this.dataList1[key]
-          }
-          this.columns[0].filters.push(filterList)
-        })
-      }
-    })*/
-
-
+    this.searchCoinInfo();
+    this.searchCoinKindNameList();
   }
 };
 </script>
