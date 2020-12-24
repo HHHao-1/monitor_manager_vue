@@ -23,24 +23,24 @@
     >
       <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" >
         <p class="tmp3">
-          <a-form-item label="主链:">
+          <a-form-item label="主链:" v-bind="formItemLayout">
             <a-select style="width: 300px" placeholder="请选择" v-model="uploadData.mainChain"   v-decorator="['mainChain',{rules: [{required: true,whitespace: true,message: '请选择主链',},],},]">
               <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
             </a-select>
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="Token名称:">
+          <a-form-item label="Token名称:" v-bind="formItemLayout">
             <a-input style="width: 300px" placeholder="请输入" v-model="uploadData.tokenName"  v-decorator="['tokenName',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入Token名称',},],},]"></a-input>
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="合约地址:">
+          <a-form-item label="合约地址:" v-bind="formItemLayout">
             <a-input style="width: 300px" placeholder="请输入" v-model="uploadData.contractAddr" v-decorator="['contractAddr',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入合约地址',},],},]"></a-input>
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="小数位:">
+          <a-form-item label="小数位:" v-bind="formItemLayout">
             <a-input style="width: 300px" placeholder="请输入" v-model="uploadData.point" v-decorator="['point',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入小数位',},],},]"></a-input>
           </a-form-item>
         </p>
@@ -62,24 +62,24 @@
     >
       <a-form :form="editForm" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" >
         <p class="tmp3">
-          <a-form-item label="主链:">
+          <a-form-item label="主链:" v-bind="formItemLayout">
             <a-select style="width: 300px" placeholder="请选择" v-model="uploadData.mainChain"   v-decorator="['mainChain',{rules: [{required: true,whitespace: true,message: '请选择主链',},],},]">
               <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
             </a-select>
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="Token名称:">
+          <a-form-item label="Token名称:" v-bind="formItemLayout">
             <a-input style="width: 300px" placeholder="请输入" v-model="uploadData.tokenName"  v-decorator="['tokenName',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入Token名称',},],},]"></a-input>
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="合约地址:">
+          <a-form-item label="合约地址:" v-bind="formItemLayout">
             <a-input style="width: 300px" placeholder="请输入" v-model="uploadData.contractAddr" v-decorator="['contractAddr',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入合约地址',},],},]"></a-input>
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="小数位:">
+          <a-form-item label="小数位:" v-bind="formItemLayout">
             <a-input style="width: 300px" placeholder="请输入" v-model="uploadData.point" v-decorator="['point',{rules: [{required: true,message: '请输入小数位',},],},]"></a-input>
           </a-form-item>
         </p>
@@ -101,47 +101,10 @@
   </div>
 </template>
 <script>
-/*const columns = [
-  {
-    title: '主链',
-    dataIndex: 'mainChain',
-    key: 'mainChain',
-    filters:[],
-    onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
-  },
-  {
-    title: '币种名称',
-    dataIndex: 'coinName',
-    key: 'coinName',
-    filters: [],
-    onFilter: (value, record) => record.coinName.indexOf(value) === 0,
-  },
-  {
-    title: '合约地址',
-    dataIndex: 'contractAddr',
-    key: 'contractAddr',
-  },
-  {
-    title: '小数位',
-    dataIndex: 'point',
-    key: 'point',
-  },
-  {
-    title: '操作',
-    dataIndex: '',
-    key: 'action',
-    scopedSlots: {
-      customRender: 'action',
-    }
-  },
-];*/
-
-
 export default {
   data() {
     return {
       dataList1:[],
-
       pagination:false,
       currentPage:1,
       pageSize:8,
@@ -167,6 +130,16 @@ export default {
         point:""
       },
       oldUploadData: {},
+      formItemLayout: {
+        labelCol: {
+          xs: { span: 24 },
+          sm: { span: 6 },
+        },
+        wrapperCol: {
+          xs: { span: 12 },
+          sm: { span: 8 },
+        },
+      },
       columns:[
         {
           title: '主链',
@@ -206,7 +179,6 @@ export default {
   },
 
   methods: {
-
     onChange(page,pageSize){
       console.log(page,pageSize)
       this.currentPage=page;
@@ -467,9 +439,7 @@ export default {
 };
 </script>
 <style >
-.ant-form-item-control-wrapper{
-  display: inline-block;
-}
+
 .table-operations {
   margin-bottom: 16px;
 }
@@ -481,20 +451,5 @@ export default {
   display: flex;
   justify-content: space-between;
 }
-#coordinated_mainChain{
-  left:45px;
-}
-#coordinated_contractAddr{
-  left:15px;
-}
-#coordinated_point{
-  left:30px
-}
-#coordinated_tokenName{
-  left:5px
-}
-.ant-form-explain{
-  font-size: 5px;
-  margin-left: 50px;
-}
+
 </style>

@@ -121,7 +121,7 @@
           <tr>
             <td>
               <p class="tmP">
-                <a-form-item label="监控用户">
+                <a-form-item label="监控用户" v-bind="formItemLayout">
                 <a-select
                   show-search
                   placeholder="请选择"
@@ -141,9 +141,7 @@
               </p>
               <!--<p class="tmP">
                 <a-form-item label="监控用户">
-                  <a-select style="width: 170px"  placeholder="请选择" v-model="uploadData.userName" v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]">
-
-                  </a-select>
+                  <a-select style="width: 170px"  placeholder="请选择" v-model="uploadData.userName" v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]"></a-select>
                 </a-form-item>
               </p>-->
             </td>
@@ -188,7 +186,6 @@
                 v-for="(k, index) in form.getFieldValue('keys')"
                 :key="k"
                 :required="false"
-
               >
                 <div>
                 <a-select
@@ -305,7 +302,7 @@
           <tr>
             <td>
               <p class="tmP">
-                <a-form-item label="监控用户">
+                <a-form-item label="监控用户" v-bind="formItemLayout">
                   <a-select
                     show-search
                     placeholder="请选择"
@@ -614,11 +611,11 @@ export default {
       formItemLayout: {
         labelCol: {
           xs: { span: 24 },
-          sm: { span: 4 },
+          sm: { span: 6},
         },
         wrapperCol: {
           xs: { span: 24 },
-          sm: { span: 20 },
+          sm: { span: 12 },
         },
       },
       formItemLayoutWithOutLabel: {
@@ -1282,13 +1279,19 @@ export default {
   display: flex;
   justify-content: space-between;
 }
-.ant-select-selection__rendered{
+/*.ant-select-selection__rendered{
   display: inline-block;
-}
+}*/
 .ant-btn-dashed{
   width:100%
 }
 
+#dynamic_form_item_userName{
+  margin-left: 10px;
+}
+#coordinated_userName{
+  margin-left: 10px;
+}
 .ant-dropdown .ant-dropdown-placement-bottomRight{
   left:320px;
 

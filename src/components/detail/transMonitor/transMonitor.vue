@@ -104,11 +104,11 @@
       okText="确定"
       @ok="handleOk"
       @cancel="cancelClick"
-      width="800px"
+
     >
       <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" >
         <p class="tmp3">
-          <a-form-item label="监控用户" >
+          <a-form-item label="监控用户" v-bind="formItemLayout">
             <a-select  style="width: 300px"  v-model="uploadData.name"  placeholder="请选择"  v-decorator="['name',{rules: [{required: true,whitespace: true,message: '请选择监控用户',},],},]">
               <a-select-option v-for="(item,i) in unique(userList)" :value="item" :key="i">
                 {{item}}
@@ -117,7 +117,7 @@
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="币种">
+          <a-form-item label="币种" v-bind="formItemLayout">
             <a-select style="width: 300px"  v-model="uploadData.coinKind"  placeholder="请选择"  v-decorator="['coinKind',{rules: [{required: true,whitespace: true,message: '请选择币种',},],},]">
               <a-select-option v-for="(item,i) in unique(coinList)" :value="item" :key="i" >
                 {{item}}
@@ -125,13 +125,18 @@
             </a-select>
           </a-form-item>
         </p>
-        <p class="tmp3">
-          <span>&nbsp;&nbsp;监控阈值:&nbsp;&nbsp;&nbsp; </span>
+        <!--<p class="tmp3">
+          <span style="margin-left: 170px">&nbsp;&nbsp;监控阈值:&nbsp;&nbsp;&nbsp; </span>
           <a-input style="width: 300px" placeholder="请输入阈值" v-model="uploadData.monitorMinVal"/>
+        </p>-->
+        <p>
+          <a-form-item label="监控阈值" v-bind="formItemLayout">
+            <a-input  placeholder="请输入" v-model="uploadData.monitorMinVal"></a-input>
+          </a-form-item>
         </p>
-        <br>
+
         <p class="tmp3">
-          <span>&nbsp;&nbsp;通知方式 :&nbsp;&nbsp; </span>
+          <span style="margin-left: 40px">&nbsp;&nbsp;通知方式 :&nbsp;&nbsp; </span>
           <a-checkbox-group v-model="uploadData.noticeWay" >
             <a-row>
               <a-checkbox value="0">短信</a-checkbox>
@@ -150,15 +155,15 @@
       okText="确定"
       @ok="editHandleOk"
       @cancel="editCancelClick"
-      width="800px"
+
     >
-      <a-form :form="editForm" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" >
+      <a-form :form="editForm"  >
         <!--<p class="tmp3" v-if="false">
           <span>&nbsp;&nbsp;监控阈值:&nbsp;&nbsp;&nbsp; </span>
           <a-input style="width: 300px" placeholder="请输入" v-model="uploadData2.id"/>
         </p>-->
         <p class="tmp3">
-          <a-form-item label="监控用户" >
+          <a-form-item label="监控用户" v-bind="formItemLayout">
             <a-select style="width: 300px" v-model="uploadData2.name"  placeholder="请选择" v-decorator="['name',{rules: [{required: true,whitespace: true,message: '请选择监控用户',},],},]">
               <a-select-option v-for="(item,i) in unique(userList)" :value="item" :key="i">
                 {{item}}
@@ -167,7 +172,7 @@
           </a-form-item>
         </p>
         <p class="tmp3">
-          <a-form-item label="币种">
+          <a-form-item label="币种" v-bind="formItemLayout">
             <a-select style="width: 300px" v-model="uploadData2.coinKind"  placeholder="请选择" v-decorator="['coinKind',{rules: [{required: true,whitespace: true,message: '请选择币种',},],},]">
               <a-select-option v-for="(item,i) in unique(coinList)" :value="item" :key="i" >
                 {{item}}
@@ -175,13 +180,14 @@
             </a-select>
           </a-form-item>
         </p>
-        <p class="tmp3">
-          <span>&nbsp;&nbsp;监控阈值:&nbsp;&nbsp;&nbsp; </span>
-          <a-input style="width: 300px" placeholder="请输入" v-model="uploadData2.monitorMinVal"/>
+        <p>
+        <a-form-item label="监控阈值" v-bind="formItemLayout">
+          <a-input  placeholder="请输入" v-model="uploadData2.monitorMinVal"></a-input>
+        </a-form-item>
         </p>
-        <br>
+
         <p class="tmp3">
-          <span>&nbsp;&nbsp;通知方式 :&nbsp;&nbsp; </span>
+          <span style="margin-left: 40px;margin-top: -20px">&nbsp;&nbsp;通知方式 :&nbsp;&nbsp; </span>
           <a-checkbox-group   v-model="uploadData2.noticeWay">
             <a-row>
               <a-checkbox value="0">短信</a-checkbox>
@@ -287,6 +293,16 @@ export default {
         monitorMinVal:"",
         coinKind:"",
         noticeWay:[]
+      },
+      formItemLayout: {
+        labelCol: {
+          xs: { span: 24 },
+          sm: { span: 6 },
+        },
+        wrapperCol: {
+          xs: { span: 24 },
+          sm: { span: 8 },
+        },
       },
 
       columns: [
@@ -820,9 +836,9 @@ export default {
 };
 </script>
 <style >
-.ant-form-item-control-wrapper{
+/*.ant-form-item-control-wrapper{
   display: inline-block;
-}
+}*/
 .highlight {
   background-color: rgb(255, 192, 105);
   padding: 0px;
@@ -831,9 +847,9 @@ export default {
   display: flex;
   justify-content: space-between;
 }
-#coordinated_coin{
+/*#coordinated_coin{
   left:28px
-}
+}*/
 .ant-form-explain{
   margin-left: 28px;
 }
@@ -848,9 +864,9 @@ export default {
   left:320px;
 
 }
-#coordinated_coinKind{
+/*#coordinated_coinKind{
   left:28px
-}
+}*/
 .notshow{
   display: none;
 }

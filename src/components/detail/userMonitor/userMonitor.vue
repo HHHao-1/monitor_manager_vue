@@ -107,22 +107,22 @@
     >
       <a-form :form="addForm" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" @submit="handleSubmit">
         <p class="tmP">
-          <a-form-item label="用户名" name="name"  >
+          <a-form-item label="用户名" v-bind="formItemLayout">
             <a-input  placeholder="请输入" v-model="uploadData.name"  v-decorator="['name',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入用户名',},],},]"></a-input>
           </a-form-item>
         </p>
         <p class="tmP">
-          <a-form-item label="电话" name="phone" >
-            <a-input placeholder="请输入" v-model="uploadData.phone" v-decorator="['phone',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入手机号',},],},]"></a-input>
+          <a-form-item label="电话"  v-bind="formItemLayout">
+            <a-input placeholder="请输入" v-model="uploadData.phone" v-decorator="['phone', {validateTrigger: ['change', 'blur'],rules: [{ required: true, message:' ',whitespace: true,},{validator:phoneCheck.bind(this)} ] },]"></a-input>
           </a-form-item>
         </p>
         <p class="tmP">
-          <a-form-item label="邮箱" name="email" >
-            <a-input placeholder="请输入" v-model="uploadData.email" v-decorator="['email',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入邮箱号',},],},]"></a-input>
+          <a-form-item label="邮箱" v-bind="formItemLayout">
+            <a-input placeholder="请输入" v-model="uploadData.email" v-decorator="['email',{validateTrigger: ['change', 'blur'],rules: [{type: 'email',message: '请输入格式正确的邮箱!',},{required: true,message: '请输入邮箱',},],},]"/>
           </a-form-item>
         </p>
         <p class="tmP">
-          <a-form-item label="备注" name="remark" >
+          <a-form-item label="备注" name="remark"  v-bind="formItemLayout">
             <a-input placeholder="请输入" v-model="uploadData.remark" v-decorator="['remark',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入备注',},],},]"></a-input>
           </a-form-item>
         </p>
@@ -139,24 +139,25 @@
     >
       <a-form :form="editForm" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" @submit="handleSubmit">
         <p class="tmP">
-          <a-form-item label="用户名" name="name"  >
-            <a-input  placeholder="请输入" v-model="uploadData.name"
-                      v-decorator="['name',{validateTrigger: ['change', 'blur'],
-                      rules: [{required: true,whitespace: true,message: '请输入用户名',},],},]"></a-input>
+          <a-form-item label="用户名"  v-bind="formItemLayout" >
+            <a-input  placeholder="请输入" v-model="uploadData.name" v-decorator="['name',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入用户名',},],},]"></a-input>
           </a-form-item>
         </p>
         <p class="tmP">
-          <a-form-item label="电话" name="phone" >
-            <a-input placeholder="请输入" v-model="uploadData.phone" v-decorator="['phone',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入手机号',},],},]"></a-input>
+          <a-form-item label="电话"  v-bind="formItemLayout">
+            <a-input placeholder="请输入" v-model="uploadData.phone" v-decorator="['phone', {validateTrigger: ['change', 'blur'],rules: [{ required: true, message:' ',whitespace: true,},{validator:phoneCheck.bind(this)} ] },]"
+            >
+            </a-input>
           </a-form-item>
         </p>
         <p class="tmP">
-          <a-form-item label="邮箱" name="email" >
-            <a-input placeholder="请输入" v-model="uploadData.email" v-decorator="['email',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入邮箱号',},],},]"></a-input>
+          <a-form-item label="邮箱" v-bind="formItemLayout">
+            <a-input placeholder="请输入" v-model="uploadData.email" v-decorator="['email',{validateTrigger: ['change', 'blur'],rules: [{type: 'email',message: '请输入格式正确的邮箱!',},{required: true,message: '请输入邮箱',},],},]"/>
+
           </a-form-item>
         </p>
         <p class="tmP">
-          <a-form-item label="备注" name="remark" >
+          <a-form-item label="备注" v-bind="formItemLayout" >
             <a-input placeholder="请输入" v-model="uploadData.remark" v-decorator="['remark',{validateTrigger: ['change', 'blur'],rules: [{required: true,whitespace: true,message: '请输入备注',},],},]"></a-input>
           </a-form-item>
         </p>
@@ -221,21 +222,6 @@ const columns = [
         }, 0);
       }
     },
-    /*onFilterDropdownVisibleChange:(visible) => { //是否显示筛选框
-     // columns[2].filterDropdownVisible=true
-      if(!visible){
-    columns[2].filterDropdownVisible=false
-  }
-
-      /!*if(visible){
-        columns[2].filterDropdownVisible=true
-
-      }else{
-        columns[2].filterDropdownVisible=false
-      }*!/
-    }*/
-
-
   },
   {
     title: '手机',
@@ -304,11 +290,33 @@ export default {
         email:"",
         remark:""
       },
-      searchText:""
+      searchText:"",
+      formItemLayout: {
+        labelCol: {
+          xs: { span: 24 },
+          sm: { span: 6 },
+        },
+        wrapperCol: {
+          xs: { span: 24 },
+          sm: { span: 16 },
+        },
+      },
     };
 
   },
   methods:{
+    phoneCheck(rule, value, callbackFn) {
+      const reg = /^[1][3,4,5,6,7,8,9][0-9]{9}$/
+      if(!value){
+        callbackFn('请输入手机号码')
+        return
+      }
+      else if (!reg.test(value)) {
+        callbackFn('请输入正确的手机号码')
+        return
+      }
+      callbackFn()
+    },
     searchNameAjax(){
       this.isUserName=true
       this.$ajax({
@@ -579,7 +587,7 @@ export default {
 </script>
 <style>
 .ant-form-item-control-wrapper{
-  display: inline-block;
+  /*display: inline-block;*/
 }
 .anticon {
   left: 80px;
@@ -601,10 +609,9 @@ export default {
   margin-top: 50px;
 }
 .ant-input{
-
   width:300px;
 }
-#coordinated_phone{
+/*#coordinated_phone{
   left:15px;
 }
 #coordinated_email{
@@ -612,10 +619,8 @@ export default {
 }
 #coordinated_remark{
   left: 15px;
-}
-.ant-form-explain{
+}*/
 
-}
 /*.page{
  padding-bottom: 2px;
 }*/
