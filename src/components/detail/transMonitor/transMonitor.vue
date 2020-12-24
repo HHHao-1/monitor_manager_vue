@@ -543,10 +543,10 @@ export default {
       let mid=this.uploadData2.noticeWay
       switch(mid.length){
         case 1:
-          notice = mid[0]
+          notice = Number(mid[0])
           break
         case 2:
-          switch (mid[0]+mid[1]){
+          switch (Number(mid[0])+Number(mid[1])){
             case 1:
               notice=3
               break

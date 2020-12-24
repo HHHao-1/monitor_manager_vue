@@ -326,7 +326,7 @@ export default {
           this.total=res.data.data.total
           // setTimeout(function(){document.getElementById("test").style.display="none";},0);
           // setTimeout(function(){document.getElementById("test").style.display="block";},1000);
-         // columns[2].filterDropdownVisible=false
+          // columns[2].filterDropdownVisible=false
 
         }
         else {
@@ -619,6 +619,6 @@ export default {
 /*.page{
  padding-bottom: 2px;
 }*/
-
 </style>
+
 
