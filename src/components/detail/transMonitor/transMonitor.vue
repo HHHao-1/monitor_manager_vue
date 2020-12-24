@@ -81,6 +81,9 @@
         <a-badge :status="statePoint(tags)"></a-badge>
         {{tags | stateFun}}
       </span>
+      <span slot="eventAddTime" slot-scope="time">
+        {{time | timeFilter}}
+      </span>
       <span slot="action" slot-scope="text, record">
         <a  @click="edit(text.id,text.name,text.coinKind,text.monitorMinVal,text.noticeWay)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
@@ -344,6 +347,9 @@ export default {
           title: '添加时间',
           dataIndex: 'eventAddTime',
           key: 'eventAddTime',
+          scopedSlots: {
+            customRender: 'eventAddTime',
+          }
         },
         {
           title: '状态',
@@ -663,12 +669,10 @@ export default {
         }
       }).then(res=>{
         if(res.data.code == "1001"){
-          // that.$message.success(res.data.msg);
-          alert('成功禁用此用户')
+          alert('成功禁用此规则')
           that.getDataList();
         }else {
-          // that.$message.error(res.data.msg)
-          alert('禁用此用户失败')
+          alert('禁用此规则失败')
           that.getDataList();
 
         }
@@ -757,7 +761,21 @@ export default {
       else
         return '禁用'
     },
-
+    timeFilter(time){
+      let d = time ? new Date(time) : new Date();
+      let year = d.getFullYear();
+      let month = d.getMonth() + 1;
+      let day = d.getDate();
+      let hours = d.getHours();
+      let min = d.getMinutes();
+      let seconds = d.getSeconds();
+      if (month < 10) month = '0' + month;
+      if (day < 10) day = '0' + day;
+      if (hours < 0) hours = '0' + hours;
+      if (min < 10) min = '0' + min;
+      if (seconds < 10) seconds = '0' + seconds;
+      return (year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds);
+    },
     noticeWayFun(way){
       if(way==0){
         return '短信'

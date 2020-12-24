@@ -569,7 +569,6 @@ export default {
       if (min < 10) min = '0' + min;
       if (seconds < 10) seconds = '0' + seconds;
       return (year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds);
-
     },
 
   },

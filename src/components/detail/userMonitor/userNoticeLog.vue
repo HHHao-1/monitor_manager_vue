@@ -82,6 +82,9 @@
       <span slot="noticeWay" slot-scope="way">
         {{way | noticeWayFun}}
       </span>
+      <span slot="noticeTime" slot-scope="time">
+        {{time | timeFilter}}
+      </span>
       <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
         提醒内容:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         交易哈希：[{{record.transHash}}]   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -103,40 +106,6 @@
 </template>
 
 <script>
-const data = [
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:1,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:2,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:40,
-    noticeWay:3,
-    addTime:'2020-10-01',
-    state:0,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:60,
-    noticeWay:4,
-    addTime:'2020-10-01',
-    state:0,
-  },
-];
 
 export default {
   data() {
@@ -148,13 +117,11 @@ export default {
       pageSize:8,
       total:500,
       pageNt:['8','10','20','30'],
-      data,
       searchText: '',
       searchInput: null,
       searchedColumn: '',
       dataList:[],
       dataList1:[],
-
       columns: [
         {
           title: '监控用户',
@@ -198,10 +165,6 @@ export default {
           title: '币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
-          /*filters: [
-            { text: 'BTC', value: 'BTC' },
-            { text: 'ETC', value: 'ETC' },
-          ],*/
           filters: [],
           onFilter: (value, record) => record.coinKind.indexOf(value) === 0,
 
@@ -219,6 +182,9 @@ export default {
           title: '提醒时间',
           dataIndex: 'noticeTime',
           key: 'noticeTime',
+          scopedSlots: {
+            customRender: 'noticeTime',
+          }
         },
 
       ],
@@ -340,7 +306,22 @@ export default {
       }else if(way == 2){
         return '客户端提醒'
       }
-    }
+    },
+    timeFilter(time){
+      let d = time ? new Date(time) : new Date();
+      let year = d.getFullYear();
+      let month = d.getMonth() + 1;
+      let day = d.getDate();
+      let hours = d.getHours();
+      let min = d.getMinutes();
+      let seconds = d.getSeconds();
+      if (month < 10) month = '0' + month;
+      if (day < 10) day = '0' + day;
+      if (hours < 0) hours = '0' + hours;
+      if (min < 10) min = '0' + min;
+      if (seconds < 10) seconds = '0' + seconds;
+      return (year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds);
+    },
   },
   mounted() {
     this.getUserLogList();

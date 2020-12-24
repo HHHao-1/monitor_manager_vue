@@ -91,6 +91,7 @@
         <a-badge :status="statePoint(tags)"></a-badge>
         {{tags | stateFun}}
     </span>
+
       <span slot="action" slot-scope="text, record">
         <a  @click="edit(text.id,text.name,text.eventName,text.noticeWay,text.address,text.coinKind,text.addressMark,text.monitorMinVal)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
@@ -99,8 +100,11 @@
         <!--{{text.coinKind}}{{text.addressMark}}{{text.monitorMinVal}}-->
       </span>
       <span slot="noticeWay" slot-scope="way">
-      {{way | noticeWayFun}}
-    </span>
+        {{way | noticeWayFun}}
+      </span>
+      <span slot="eventAddTime" slot-scope="time">
+        {{time | timeFilter}}
+      </span>
     </a-table>
     <!--添加-->
     <a-modal
@@ -586,6 +590,9 @@ export default {
           title: '添加时间',
           dataIndex: 'eventAddTime',
           key: 'eventAddTime',
+          scopedSlots: {
+            customRender: 'eventAddTime',
+          }
         },
         {
           title: '状态',
@@ -655,6 +662,7 @@ export default {
       let temp=[];
       for(let i=0;i<this.dataObj.address.length;i++) {
         if (this.dataObj.address[i]=="") {
+          console.log(this.dataObj.address[i])
           temp[i]=document.getElementsByName(this.va2)[i];
           setTimeout(function () {
             temp[i].style.display="block"
@@ -670,6 +678,26 @@ export default {
         }
       }
     },
+    /*validataAddr2(){
+      let temp=[];
+      for(let i=0;i<this.dataObj.address.length;i++) {
+        if (this.dataObj.address[i]=="") {
+          console.log(this.dataObj.address[i])
+          temp[i]=document.getElementsByName(this.va2)[i];
+          setTimeout(function () {
+            temp[i].style.display="block"
+          }, 0);
+          this.isValidata2=true;
+        }
+        else  {
+          temp[i]=document.getElementsByName(this.va2)[i];
+          setTimeout(function () {
+            temp[i].style.display="none"
+          }, 0);
+          this.isValidata2=false;
+        }
+      }
+    },*/
     searchNameAjax(){
       this.isName = true
       this.$ajax({
@@ -1016,11 +1044,11 @@ export default {
       }).then(res=>{
         if(res.data.code == "1001"){
           //that.$message.success(res.data.msg);
-          alert('成功禁用此用户')
+          alert('成功禁用此规则')
           that.getDataList();
         }else {
           //that.$message.error(res.data.msg)
-          alert('禁用此用户失败')
+          alert('禁用此规则失败')
           that.getDataList();
 
         }
@@ -1219,7 +1247,22 @@ export default {
       }else if(way == 6){
         return '短信、邮件、客户端提醒'
       }
-    }
+    },
+    timeFilter(time){
+      let d = time ? new Date(time) : new Date();
+      let year = d.getFullYear();
+      let month = d.getMonth() + 1;
+      let day = d.getDate();
+      let hours = d.getHours();
+      let min = d.getMinutes();
+      let seconds = d.getSeconds();
+      if (month < 10) month = '0' + month;
+      if (day < 10) day = '0' + day;
+      if (hours < 0) hours = '0' + hours;
+      if (min < 10) min = '0' + min;
+      if (seconds < 10) seconds = '0' + seconds;
+      return (year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds);
+    },
   },
   mounted() {
     this.getDataList();
