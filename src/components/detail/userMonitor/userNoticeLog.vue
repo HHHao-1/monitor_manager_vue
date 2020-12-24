@@ -3,9 +3,9 @@
   <div>
     <div class="top">
       <h2>提醒日志</h2>
-      <a-button type="default" @click="gotoBack" :pagination="pagination">返回</a-button>
+      <a-button type="default" @click="gotoBack" >返回</a-button>
     </div>
-    <a-table :data-source="dataList" :columns="columns"  >
+    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -225,13 +225,13 @@ export default {
         this.searchEventAjax()
       }
       else{
-        this.getDataList();
+        this.getUserLogList();
       }
     },
     onShowSizeChange(current, pageSize) {
       console.log(current, pageSize);
       this.pageSize = pageSize;
-      this.getDataList();
+      this.getUserLogList();
     },
     getUserLogList(){
       let that = this;
@@ -246,12 +246,13 @@ export default {
           pageSize:that.pageSize,
         }
       }).then(res=>{
+        console.log('12222222111')
         console.log(res)
         if(res.data.code == '1001'){
           that.dataList = res.data.data.data
           that.total=res.data.data.total
-          for(let i= 0 ;i<res.data.data.length;i++) {
-            if (res.data.data[i].eventName != null) {
+          for(let i = 0 ;i< that.dataList.length;i++) {
+            if (that.dataList[i].eventName != null) {
               that.dataList[i].monitorType = '地址异动监控'
             } else {
               that.dataList[i].monitorType = '大额交易监控'
@@ -298,13 +299,21 @@ export default {
   },
   filters:{
     noticeWayFun(way){
-      if(way == 0){
+      if(way==0){
         return '短信'
       }
       else if(way == 1){
         return '邮件'
       }else if(way == 2){
         return '客户端提醒'
+      }else if(way == 3) {
+        return '短信、邮件'
+      }else if(way ==4){
+        return '短信、客户端提醒'
+      }else if(way == 5){
+        return '邮件、客户端提醒'
+      }else if(way == 6){
+        return '短信、邮件、客户端提醒'
       }
     },
     timeFilter(time){

@@ -132,7 +132,7 @@ export default {
       dataList:[],
       dataList1:[],
       currentPage:1,
-      pageSize:10,
+      pageSize:8,
       columns: [
         {
           title: '监控用户',
@@ -158,7 +158,7 @@ export default {
             customRender: 'customRender',
           },
           onFilter: (value, record) =>
-            record.name
+            record.eventName
               .toString()
               .toLowerCase()
               .includes(value.toLowerCase()),
@@ -220,7 +220,7 @@ export default {
         if(res.data.code == '1001'){
           that.dataList = res.data.data.data
           that.total=res.data.data.total
-          for(let i= 0 ;i<res.data.data.length;i++) {
+          for(let i= 0 ;i<that.dataList.length;i++) {
             that.dataList[i].monitorType = '大额交易监控'
           }
         }
@@ -241,12 +241,12 @@ export default {
     onChange(page,pageSize){
       console.log(page,pageSize)
       this.currentPage=page;
-      this.getDataList();
+      this.getTransLogList();
     },
     onShowSizeChange(current, pageSize) {
       console.log(current, pageSize);
       this.pageSize = pageSize;
-      this.getDataList();
+      this.getTransLogList();
     },
     searchCoinInfo(){
       this.$ajax({
@@ -255,7 +255,6 @@ export default {
       }).then(res=>{
         console.log(res)
         if(res.data.code == '1001'){
-          console.log('132412352435')
           console.log(res.data.data)
           this.dataList1 = res.data.data
           Object.keys(this.dataList1).forEach(key=>{
@@ -293,8 +292,16 @@ export default {
         return '邮件'
       }else if(way == 2){
         return '客户端提醒'
+      }else if(way == 3) {
+        return '短信、邮件'
+      }else if(way ==4){
+        return '短信、客户端提醒'
+      }else if(way == 5){
+        return '邮件、客户端提醒'
+      }else if(way == 6){
+        return '短信、邮件、客户端提醒'
       }
-    }
+    },
   },
   mounted() {
     this.getTransLogList();

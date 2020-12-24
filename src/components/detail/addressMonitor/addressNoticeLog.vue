@@ -211,7 +211,7 @@ export default {
         if(res.data.code == '1001'){
           that.dataList = res.data.data.data;
           that.total=res.data.data.total
-          for(let i= 0 ;i<res.data.data.length;i++) {
+          for(let i= 0 ;i<that.dataList.length;i++) {
             that.dataList[i].monitorType = '地址异动监控'
           }
         }
@@ -252,7 +252,7 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      this.searchText = selectedKeys[0];
+     // this.searchText = selectedKeys[0];
       this.searchedColumn = dataIndex;
     },
     handleReset(clearFilters) {
@@ -304,6 +304,14 @@ export default {
         return '邮件'
       }else if(way == 2){
         return '客户端提醒'
+      }else if(way == 3) {
+        return '短信、邮件'
+      }else if(way ==4){
+        return '短信、客户端提醒'
+      }else if(way == 5){
+        return '邮件、客户端提醒'
+      }else if(way == 6){
+        return '短信、邮件、客户端提醒'
       }
     },
     timeFilter(time){

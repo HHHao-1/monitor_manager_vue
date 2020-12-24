@@ -482,7 +482,7 @@ export default {
       currentPage:1,
       pageSize:8,
       total:0,
-      pageNt:['10','20','30','40','50'],
+      pageNt:['8','10','20','30'],
       dataObj:{
         userName:'',
         eventName:'',
@@ -564,7 +564,7 @@ export default {
             customRender: 'customRender',
           },
           onFilter: (value, record) =>
-            record.age
+            record.eventName
               .toString()
               .toLowerCase()
               .includes(value.toLowerCase()),
