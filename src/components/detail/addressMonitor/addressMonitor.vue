@@ -863,17 +863,17 @@ export default {
     editDataList1(){
       var list=[]
       class obj{
+        uid
         id
-        userName
         eventName
         noticeWay
         coinKind
         address
         addressMark
         monitorMinVal
-        constructor(id,userName,eventName,noticeWay,coinKind,address,addressMark,monitorMinVal) {
-          this.id=id;
-          this.userName=userName;
+        constructor(uid,id,eventName,noticeWay,coinKind,address,addressMark,monitorMinVal) {
+          this.uid=uid;
+          this.id=0;
           this.eventName=eventName
           this.noticeWay=noticeWay;
           this.coinKind=coinKind;

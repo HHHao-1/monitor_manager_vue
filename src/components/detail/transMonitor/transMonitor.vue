@@ -155,7 +155,6 @@
       okText="确定"
       @ok="editHandleOk"
       @cancel="editCancelClick"
-
     >
       <a-form :form="editForm"  >
         <!--<p class="tmp3" v-if="false">
@@ -581,14 +580,14 @@ export default {
       }
       let list=[];
       class obj{
+        uid
         id
-        userName
         coinKind
         noticeWay
         monitorMinVal
-        constructor(id,userName,coinKind,noticeWay,monitorMinVal){
-          this.id = id
-          this.userName=userName;
+        constructor(uid,idTEST,coinKind,noticeWay,monitorMinVal){
+          this.uid = uid
+          this.id=0;
           this.coinKind=coinKind;
           this.noticeWay=noticeWay;
           this.monitorMinVal=monitorMinVal;

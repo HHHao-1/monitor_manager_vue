@@ -232,7 +232,7 @@ export default {
     },
     getUserLogList(){    //需要上一个页面传入name
       let name = sessionStorage.getItem('name');
-      console.log(name)
+      //console.log(name)
       this.$ajax({
         method:"get",
         url:'/monitor/admin/notice-logs',
