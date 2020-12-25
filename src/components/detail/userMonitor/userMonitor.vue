@@ -89,7 +89,7 @@
         <a  @click="edit(text.name,text.phone,text.email,text.remark, text.id)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
-        <a  @click="gotoLog">提醒日志</a>
+        <a  @click="gotoLog(text.name)">提醒日志</a>
       </span>
         <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
           添加时间：{{ record.createTime | timeFilter}}
@@ -377,6 +377,9 @@ export default {
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
+          /*let userName = "123";
+          sessionStorage.setItem("logName",userName);
+          console.log(sessionStorage.getItem("logName"))*/
         }
       })
     },
@@ -532,7 +535,8 @@ export default {
     handleSubmit() {
       //
     },
-    gotoLog(){
+    gotoLog(name){
+      sessionStorage.setItem('name',name);
       this.$router.replace('/userNoticeLog')
     },
     statePoint(state){

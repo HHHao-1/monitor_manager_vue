@@ -206,11 +206,15 @@ export default {
   },
   methods: {
     getTransLogList(){
+     // let name = sessionStorage.getItem('name');
+      let id =sessionStorage.getItem('id');
       let that = this;
       that.$ajax({
         method:"get",
         url:'/monitor/admin/notice-logs/trans',
         params:{
+          ruleId:id,
+          userName:name,
           coinKind:'',
           currentPage:that.currentPage,
           pageSize:that.pageSize,

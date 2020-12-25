@@ -203,24 +203,8 @@ export default {
       }).then(res=>{
         console.log(res)
         if(res.data.code == '1001'){
-         // this.columns[0].filters = []
-         // this.columns[1].filters = []
           this.dataList = res.data.data.data
           this.total=res.data.data.total
-          /*Object.keys(this.dataList).forEach(key=>{
-            let filterList = {
-              text:this.dataList[key].mainChain,
-              value:this.dataList[key].mainChain
-            }
-            this.columns[0].filters.push(filterList)
-          })
-          Object.keys(this.dataList).forEach(key=>{
-            let filterList = {
-              text:this.dataList[key].coinName,
-              value:this.dataList[key].coinName
-            }
-            this.columns[1].filters.push(filterList)
-          })*/
         }
       })
     },

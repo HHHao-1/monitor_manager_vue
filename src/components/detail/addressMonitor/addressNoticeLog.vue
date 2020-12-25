@@ -196,11 +196,16 @@ export default {
   },
   methods: {
     getAddrLogList(){
+      let id =sessionStorage.getItem('id');
+      //let name = sessionStorage.getItem('name');
+      console.log(name)
       let that = this;
       that.$ajax({
         method:"get",
         url:'/monitor/admin/notice-logs/addr',
         params:{
+          ruleId:id,
+          userName:'',
           eventName:'',
           coinKind:'',
           currentPage:that.currentPage,

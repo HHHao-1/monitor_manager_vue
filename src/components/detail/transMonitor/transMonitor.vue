@@ -88,7 +88,7 @@
         <a  @click="edit(text.id,text.name,text.coinKind,text.monitorMinVal,text.noticeWay)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
-        <a  @click="gotoLog">提醒日志</a>
+        <a  @click="gotoLog(text.id)">提醒日志</a>
         <!--{{text.id}}{{text.coinKind}}{{text.monitorMinVal}}{{text.name}}{{text.coinKind}}-->
       </span>
       <span slot="noticeWay" slot-scope="way">
@@ -217,6 +217,7 @@
 </template>
 
 <script>
+import { Message } from 'element-ui'
 const data = [
   {
     name:'张三',
@@ -496,8 +497,8 @@ export default {
     },
     //添加
     addTransDataList(){
-      let notice=0
-      let mid=this.uploadData.noticeWay
+      let notice
+        let mid=this.uploadData.noticeWay
       switch(mid.length){
         case 1:
           notice = new Number(mid[0]);
@@ -554,7 +555,7 @@ export default {
     },
     // 修改
     updataList(){
-      let notice=0
+      let notice
       console.log(this.uploadData2.noticeWay)
       let mid=this.uploadData2.noticeWay
       switch(mid.length){
@@ -697,11 +698,13 @@ export default {
     handleOk(e) {
       e.preventDefault();
       this.form.validateFields(err => {
-        if (!err) {
+        if (!err && this.uploadData.noticeWay!='') {
           this.addTransDataList();
           this.getDataList();
           this.visible=false;
-
+        }
+        else{
+          Message.error('请填写通知方式！')
         }
       });
 
@@ -716,13 +719,15 @@ export default {
       }
     },
     editHandleOk(e){
-      //this.updataList();
       e.preventDefault();
       this.editForm.validateFields(err => {
-        if (!err) {
+        if (!err && this.uploadData2.noticeWay!='') {
           this.updataList();
           this.editVisible=false;
           this.getDataList();
+        }
+        else{
+          Message.error('请填写通知方式！')
         }
       });
 
@@ -738,7 +743,8 @@ export default {
       else
         return 'default';
     },
-    gotoLog(){
+    gotoLog(id){
+      sessionStorage.setItem('id',id);
       this.$router.replace('/transNoticeLog')
     },
     showModal(){

@@ -96,7 +96,7 @@
         <a  @click="edit(text.id,text.name,text.eventName,text.noticeWay,text.address,text.coinKind,text.addressMark,text.monitorMinVal)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
-        <a  @click="gotoLog">提醒日志</a>
+        <a  @click="gotoLog(text.id)">提醒日志</a>
         <!--{{text.coinKind}}{{text.addressMark}}{{text.monitorMinVal}}-->
       </span>
       <span slot="noticeWay" slot-scope="way">
@@ -811,7 +811,7 @@ export default {
           this.monitorMinVal=monitorMinVal;
         }
       }
-      let notice = 0
+      let notice;
       let mid=this.uploadData.noticeWay
       switch(mid.length){
         case 1:
@@ -882,7 +882,7 @@ export default {
           this.monitorMinVal=monitorMinVal;
         }
       }
-      let notice=0
+      let notice
       let mid=this.notice
       let length = mid.length
       switch(length){
@@ -1094,13 +1094,16 @@ export default {
     handleOk(e){
       e.preventDefault();
       this.form.validateFields(err=>{
-        if(!err  && (this.isValidata2==false)){
+        if(!err  && (this.isValidata2==false) && this.uploadData.noticeWay!=''){
           this.addAddressDataList();
           this.visible=false;
           this.getDataList();
         }
+        else if(this.uploadData.noticeWay==''){
+          Message.error('请填写通知方式！')
+        }
         else {
-          Message.error('请完善信息！')
+          Message.error('请填写地址信息！')
         }
       })
     },
@@ -1123,13 +1126,16 @@ export default {
     editHandleOk(e){
       e.preventDefault();
       this.editForm.validateFields(err=>{
-        if(!err && (this.isValidata1==false)){
+        if(!err && (this.isValidata1==false && this.notice!='')){
           this.editVisible=false;
           this.editDataList1();
           this.getDataList();
         }
+        else if(this.notice==''){
+          Message.error('请填写通知方式！')
+        }
         else{
-          Message.error('请完善信息！')
+          Message.error('请填写地址信息！')
           // alert('请完善信息')
         }
       })
@@ -1143,7 +1149,9 @@ export default {
       });
     },
 
-    gotoLog(){
+    gotoLog(id){
+      sessionStorage.setItem('id',id);
+      //sessionStorage.setItem('name',name);
       this.$router.replace('/addressNoticeLog')
     },
     showModal(){

@@ -49,9 +49,6 @@
         <a-button size="small" style="width: 90px" @click="reset">
           Reset
         </a-button>
-
-
-
       </div>
       <a-icon
         slot="filterIcon"
@@ -233,31 +230,33 @@ export default {
       this.pageSize = pageSize;
       this.getUserLogList();
     },
-    getUserLogList(){
-      let that = this;
-      that.$ajax({
+    getUserLogList(){    //需要上一个页面传入name
+      let name = sessionStorage.getItem('name');
+      console.log(name)
+      this.$ajax({
         method:"get",
         url:'/monitor/admin/notice-logs',
         params:{
+          userName:name,
           monitorType:'',
           eventName:'',
           coinKind:'',
-          currentPage:that.currentPage,
-          pageSize:that.pageSize,
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log('12222222111')
-        console.log(res)
         if(res.data.code == '1001'){
-          that.dataList = res.data.data.data
-          that.total=res.data.data.total
-          for(let i = 0 ;i< that.dataList.length;i++) {
-            if (that.dataList[i].eventName != null) {
-              that.dataList[i].monitorType = '地址异动监控'
+          this.dataList = res.data.data.data
+          this.total = res.data.data.total
+          for(let i = 0 ;i< this.dataList.length;i++) {
+            if (this.dataList[i].eventName != null) {
+              this.dataList[i].monitorType = '地址异动监控'
             } else {
-              that.dataList[i].monitorType = '大额交易监控'
+              this.dataList[i].monitorType = '大额交易监控'
             }
           }
+       //   console.log(sessionStorage.getItem("logName"))
+
         }
       })
     },
