@@ -568,19 +568,21 @@ export default {
         return '禁用'
     },
     timeFilter(time){
-      let d = time ? new Date(time) : new Date();
-      let year = d.getFullYear();
-      let month = d.getMonth() + 1;
-      let day = d.getDate();
-      let hours = d.getHours();
-      let min = d.getMinutes();
-      let seconds = d.getSeconds();
-      if (month < 10) month = '0' + month;
-      if (day < 10) day = '0' + day;
-      if (hours < 0) hours = '0' + hours;
-      if (min < 10) min = '0' + min;
-      if (seconds < 10) seconds = '0' + seconds;
-      return (year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds);
+      if(time!=null) {
+        let d = new Date(time);
+        let year = d.getFullYear();
+        let month = d.getMonth() + 1;
+        let day = d.getDate();
+        let hours = d.getHours();
+        let min = d.getMinutes();
+        let seconds = d.getSeconds();
+        if (month < 10) month = '0' + month;
+        if (day < 10) day = '0' + day;
+        if (hours < 0) hours = '0' + hours;
+        if (min < 10) min = '0' + min;
+        if (seconds < 10) seconds = '0' + seconds;
+        return (year + '-' + month + '-' + day + '  ' + hours + ':' + min + ':' + seconds);
+      }
     },
 
   },
