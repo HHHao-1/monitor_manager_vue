@@ -4,16 +4,16 @@
       <h2>大额交易监控规则管理</h2>
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
-    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
+    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" @change="handleChange">
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
         style="padding: 8px"
       >
-        <!--<a-input
+        <a-input
           v-ant-ref="c => (searchInput = c)"
           :placeholder="`Search ${column.dataIndex}`"
-          :value="selectedKeys[0]"
+          v-model="searchName1"
           style="width: 188px; margin-bottom: 8px; display: block;left:80px"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
@@ -29,8 +29,8 @@
         </a-button>
         <a-button size="small" style="width: 90px;left:80px" @click="() => handleReset(clearFilters)">
           Reset
-        </a-button>-->
-        <a-input
+        </a-button>
+        <!--<a-input
           style="width: 188px; margin-bottom: 8px; display: block;left: 70px"
           v-model="searchName1"
           placeholder="Search Name"
@@ -48,7 +48,7 @@
         </a-button>
         <a-button size="small" style="width: 90px;left: 70px" @click="reset">
           Reset
-        </a-button>
+        </a-button>-->
 
       </div>
       <a-icon
@@ -316,16 +316,17 @@ export default {
           title: '监控用户',
           dataIndex: 'name',
           key: 'name',
+          width:'200px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
             customRender: 'customRender',
           },
-          onFilter: (value, record) =>
+          /*onFilter: (value, record) =>
             record.name
               .toString()
               .toLowerCase()
-              .includes(value.toLowerCase()),
+              .includes(value.toLowerCase()),*/
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
@@ -340,21 +341,22 @@ export default {
           title: '监控币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
+          width:'200px',
           // filters: (() => {return this.aaa})(),
           filters:[],
           onFilter: (value, record) => record.coinKind.indexOf(value) === 0,
-
-
         },
         {
           title: '阈值',
           dataIndex: 'monitorMinVal',
           key: 'monitorMinVal',
+          width:'200px',
         },
         {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
+          width:'250px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -363,6 +365,7 @@ export default {
           title: '添加时间',
           dataIndex: 'eventAddTime',
           key: 'eventAddTime',
+          width:'220px',
           scopedSlots: {
             customRender: 'eventAddTime',
           }
@@ -371,6 +374,7 @@ export default {
           title: '状态',
           dataIndex: 'state',
           key: 'state',
+          width:'180px',
           scopedSlots: {
             customRender: 'state',
           }
@@ -395,6 +399,16 @@ export default {
     }
   },
   methods: {
+    /*handleChange(pagination, filters, sorter, { currentDataSource }){
+      console.log('params', pagination, filters, sorter);
+      let filtersObj = [] ;
+      filtersObj=filters
+      console.log('1111')
+      console.log(filtersObj)
+      for(let i=0;i<filtersObj.coinKind.length;i++){
+        console.log(filtersObj.coinKind[i])
+      }
+    },*/
     searchNameAjax(){
       this.isMonitorName=true
       this.$ajax({
@@ -764,12 +778,45 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/trans-rules',
+        params:{
+          coin:'',
+          userName:this.searchName1,
+          userId:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+      })
+
     },
     handleReset(clearFilters) {
       clearFilters();
-      this.searchText = '';
+      this.searchName1='';
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/trans-rules',
+        params:{
+          coin:'',
+          userName:this.searchName1,
+          userId:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+      })
     },
 
 

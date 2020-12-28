@@ -12,13 +12,11 @@
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
           style="padding: 8px"
-          id="test"
         >
-
-          <!--<a-input
+          <a-input
             v-ant-ref="c => (searchInput = c)"
             :placeholder="`Search ${column.dataIndex}`"
-            :value="selectedKeys[0]"
+            v-model="searchName"
             style="width: 188px; margin-bottom: 8px; display: block;"
             @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
             @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
@@ -34,8 +32,8 @@
           </a-button>
           <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
             Reset
-          </a-button>-->
-          <a-input
+          </a-button>
+          <!--<a-input
             id="searchInput"
             style="width: 188px; margin-bottom: 8px; display: block;"
             placeholder="Search Name"
@@ -53,7 +51,7 @@
           </a-button>
           <a-button size="small" style="width: 90px" @click="reset">
             Reset
-          </a-button>
+          </a-button>-->
         </div>
         <a-icon
           slot="filterIcon"
@@ -61,6 +59,7 @@
           type="search"
           :style="{ color: filtered ? '#108ee9' : undefined }"
         />
+<!--
         <template slot="customRender" slot-scope="text, record, index, column">
       <span v-if="searchText && searchedColumn === column.dataIndex">
         <template
@@ -81,6 +80,7 @@
             {{ text }}
           </template>
         </template>
+-->
         <span slot="state" slot-scope="tags">
         <a-badge :status="statePoint(tags)"></a-badge>
         {{tags | stateFun}}
@@ -184,7 +184,7 @@
 </template>
 <script>
 let flag=false
-const columns = [
+/*const columns = [
   {
     title: 'AppID',
     dataIndex: 'appId',
@@ -204,20 +204,19 @@ const columns = [
       filterIcon: 'filterIcon',
       customRender: 'customRender',
     },
-    onFilter: (value, record) =>{
+   /!* onFilter: (value, record) =>{
       console.log(record)
       console.log(value)
       record.name
         .toString()
         .toLowerCase()
         .includes(value.toLowerCase())
-    },
-
+    },*!/
     onFilterDropdownVisibleChange: visible => {
       if (visible) {
         setTimeout(() => {
           const input = document.getElementById("searchInput")
-          input.focus()
+          //input.focus()
           // this.searchInput.focus();
         }, 0);
       }
@@ -259,7 +258,7 @@ const columns = [
         customRender: 'action'
       },
   },
-];
+];*/
 
 export default {
   name: "userMonitor",
@@ -270,7 +269,6 @@ export default {
       searchInput: null,
       searchedColumn: '',
       id:0,
-      columns,
       fileList:[],
       addForm: this.$form.createForm(this, { name: 'coordinated' }),
       editForm: this.$form.createForm(this, { name: 'coordinated' }),
@@ -301,6 +299,97 @@ export default {
           sm: { span: 16 },
         },
       },
+
+      columns: [
+        {
+          title: 'AppID',
+          dataIndex: 'appId',
+          key: 'appId',
+          width:'100px',
+          align:'center'
+
+        },
+        {
+          title: 'UID',
+          dataIndex: 'id',
+          key: 'id',
+          width:'100px'
+        },
+        { title: '用户名',
+          dataIndex: 'name',
+          key: 'name',
+          width:'150px',
+
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+            customRender: 'customRender',
+          },
+        /*/* onFilter: (value, record) =>{
+        console.log(record)
+        console.log(value)
+        record.name
+          .toString()
+          .toLowerCase()
+          .includes(value.toLowerCase())
+    },*!/*/
+    onFilterDropdownVisibleChange: visible => {
+      if (visible) {
+        setTimeout(() => {
+          const input = document.getElementById("searchInput")
+          //input.focus()
+          // this.searchInput.focus();
+        }, 0);
+      }
+    },
+  },
+    {
+      title: '手机',
+      dataIndex: 'phone',
+      key: 'phone',
+      width:'220px',
+      align:'center',
+    },
+    {
+      title: '邮箱',
+      dataIndex: 'email',
+      key: 'email',
+      width:'250px',
+      align:'center',
+
+    },
+    {
+      title: '备注',
+      dataIndex: 'remark',
+      key: 'remark',
+      width:'200px',
+      align:'center',
+
+    },
+
+    {
+      title: '状态',
+      key: 'state',
+      dataIndex: 'state',
+      width:'200px',
+      align:'center',
+      scopedSlots:
+      {
+        customRender: 'state'
+      },
+    },
+    {
+      title: '操作',
+      key: 'action',
+      align:'center',
+      dataIndex:'',
+      scopedSlots:
+      {
+        customRender: 'action'
+      },
+    },
+  ]
+
     };
 
   },
@@ -332,10 +421,6 @@ export default {
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
-          // setTimeout(function(){document.getElementById("test").style.display="none";},0);
-          // setTimeout(function(){document.getElementById("test").style.display="block";},1000);
-          // columns[2].filterDropdownVisible=false
-
         }
         else {
           this.dataList=null;
@@ -377,9 +462,6 @@ export default {
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
-          /*let userName = "123";
-          sessionStorage.setItem("logName",userName);
-          console.log(sessionStorage.getItem("logName"))*/
         }
       })
     },
@@ -473,12 +555,52 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      //this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
+      console.log(dataIndex)// 这就是table culums 的属性名称
+      this.searchText = selectedKeys[0];
+      console.log('11111')
+      console.log(this.searchText)
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/users',
+        params:{
+          name:this.searchName,
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+        else {
+          this.dataList=null;
+        }
+      })
+
     },
     handleReset(clearFilters) {
       clearFilters();
-      this.searchText = '';
+      this.searchName = '';
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/users',
+        params:{
+          name:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+        else {
+          this.dataList=null;
+        }
+      })
+
     },
     onChange(page,pageSize){
       console.log(page,pageSize)

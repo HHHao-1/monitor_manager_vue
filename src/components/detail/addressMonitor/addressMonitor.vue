@@ -5,7 +5,8 @@
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
     <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
-      <div
+
+      <!--<div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
         style="padding: 8px"
@@ -33,7 +34,6 @@
         </div>
 
       </div>
-
       <div
         slot="filterDropdown1"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -59,6 +59,96 @@
         <a-button size="small" style="width: 90px" @click="reset1">
           Reset
         </a-button>
+      </div>-->
+      <div
+        slot="filterDropdown"
+        slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+        style="padding: 8px"
+      >
+        <a-input
+          v-ant-ref="c => (searchInput = c)"
+          :placeholder="`Search ${column.dataIndex}`"
+          v-model="searchName1"
+          style="width: 188px; margin-bottom: 8px; display: block;"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+          type="primary"
+          icon="search"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          Search
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          Reset
+        </a-button>
+        <!--<a-input
+          id="searchInput"
+          style="width: 188px; margin-bottom: 8px; display: block;"
+          placeholder="Search Name"
+          v-model="searchName"
+          @pressEnter="searchNameAjax"
+        />
+        <a-button
+          type="primary"
+          icon="search"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="searchNameAjax"
+        >
+          Search
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="reset">
+          Reset
+        </a-button>-->
+      </div>
+      <div
+        slot="filterDropdown1"
+        slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+        style="padding: 8px"
+      >
+        <a-input
+          v-ant-ref="c => (searchInput = c)"
+          :placeholder="`Search ${column.dataIndex}`"
+          v-model="searchEvent1"
+          style="width: 188px; margin-bottom: 8px; display: block;"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+          type="primary"
+          icon="search"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          Search
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          Reset
+        </a-button>
+        <!--<a-input
+          id="searchInput"
+          style="width: 188px; margin-bottom: 8px; display: block;"
+          placeholder="Search Name"
+          v-model="searchName"
+          @pressEnter="searchNameAjax"
+        />
+        <a-button
+          type="primary"
+          icon="search"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="searchNameAjax"
+        >
+          Search
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="reset">
+          Reset
+        </a-button>-->
       </div>
       <a-icon
         slot="filterIcon"
@@ -531,22 +621,18 @@ export default {
           title: '监控用户',
           dataIndex: 'name',
           key: 'name',
+          width:'200px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
             customRender: 'customRender',
           },
-          onFilter: (value, record) =>
-            record.name
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                const input = document.getElementById("searchInput1")
-                input.focus()
-               // this.searchInput.focus();
+                //const input = document.getElementById("searchInput1")
+               // input.focus()
+                this.searchInput.focus();
               }, 0);
             }
           },
@@ -555,22 +641,18 @@ export default {
           title: '监控事件',
           dataIndex: 'eventName',
           key: 'eventName',
+          width:'250px',
           scopedSlots: {
             filterDropdown: 'filterDropdown1',
             filterIcon: 'filterIcon',
-            customRender: 'customRender',
+            customRender: 'customRender1',
           },
-          onFilter: (value, record) =>
-            record.eventName
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                const input = document.getElementById("searchInput2")
-                input.focus()
-                //this.searchInput.focus();
+                //const input = document.getElementById("searchInput2")
+                //input.focus()
+                this.searchInput.focus();
               }, 0);
             }
           },
@@ -579,6 +661,7 @@ export default {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
+          width:'300px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -587,6 +670,7 @@ export default {
           title: '添加时间',
           dataIndex: 'eventAddTime',
           key: 'eventAddTime',
+          width:'250px',
           scopedSlots: {
             customRender: 'eventAddTime',
           }
@@ -595,6 +679,7 @@ export default {
           title: '状态',
           dataIndex: 'state',
           key: 'state',
+          width:'200px',
           scopedSlots: {
             customRender: 'state',
           }
@@ -1185,13 +1270,69 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
+      if(dataIndex=='name'){
+        this.$ajax({
+          method:"get",
+          url:'/monitor/admin/addr-rules',
+          params:{
+            event:'',
+            userName:this.searchName1,
+            userId:'',
+            currentPage:this.currentPage,
+            pageSize:this.pageSize,
+          }
+        }).then(res=>{
+          console.log(res)
+          if(res.data.code == '1001'){
+            this.dataList = res.data.data.data
+            this.total=res.data.data.total
+          }
+        })
+      }
+      else{
+        this.$ajax({
+          method:"get",
+          url:'/monitor/admin/addr-rules',
+          params:{
+            event:this.searchEvent1,
+            userName:'',
+            userId:'',
+            currentPage:this.currentPage,
+            pageSize:this.pageSize,
+          }
+        }).then(res=>{
+          console.log(res)
+          if(res.data.code == '1001'){
+            this.dataList = res.data.data.data
+            this.total=res.data.data.total
+          }
+        })
+      }
+
     },
 
     handleReset(clearFilters) {
       clearFilters();
-      this.searchText = '';
+      this.searchName1 = '';
+      this.searchEvent1='';
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/addr-rules',
+        params:{
+          event:'',
+          userName:'',
+          userId:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+      })
+
     },
 
     onChange(page,pageSize){

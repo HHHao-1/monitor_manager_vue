@@ -137,44 +137,25 @@ export default {
         {
           title: '监控用户',
           dataIndex: 'userName',
-          key: 'userName'
+          key: 'userName',
+          width:'250px',
         },
         {
           title: '监控类型',
           dataIndex: 'monitorType',
           key: 'monitorType',
+          width:'250px',
           /*filters: [
             { text: '大额交易监控', value: '大额交易监控' },
             { text: '地址异动监控', value: '地址异动监控' },
           ],*/
-        },
-        {
-          title: '监控事件',
-          dataIndex: 'eventName',
-          key: 'eventName',
-          scopedSlots: {
-            filterDropdown: 'filterDropdown',
-            filterIcon: 'filterIcon',
-            customRender: 'customRender',
-          },
-          onFilter: (value, record) =>
-            record.eventName
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
-          onFilterDropdownVisibleChange: visible => {
-            if (visible) {
-              setTimeout(() => {
-              //  this.searchInput.focus();
-              }, 0);
-            }
-          },
         },
 
         {
           title: '币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
+          width:'200px',
           /*filters: [
             { text: 'BTC', value: 'BTC' },
             { text: 'ETC', value: 'ETC' },
@@ -187,6 +168,7 @@ export default {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
+          width:'300px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -266,7 +248,7 @@ export default {
               text:this.dataList1[key],
               value:this.dataList1[key]
             }
-            this.columns[3].filters.push(filterList)
+            this.columns[2].filters.push(filterList)
           })
         }
       })

@@ -5,16 +5,16 @@
       <h2>提醒日志</h2>
       <a-button type="default" @click="gotoBack" >返回</a-button>
     </div>
-    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
+    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" @change="handleChange">
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
         style="padding: 8px"
       >
-        <!--<a-input
+        <a-input
           v-ant-ref="c => (searchInput = c)"
           :placeholder="`Search ${column.dataIndex}`"
-          :value="selectedKeys[0]"
+          v-model="searchEvent"
           style="width: 188px; margin-bottom: 8px; display: block;"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
@@ -30,8 +30,8 @@
         </a-button>
         <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
           Reset
-        </a-button>-->
-        <a-input
+        </a-button>
+        <!--<a-input
           style="width: 188px; margin-bottom: 8px; display: block;"
           placeholder="Search Name"
           v-model="searchEvent"
@@ -48,7 +48,7 @@
         </a-button>
         <a-button size="small" style="width: 90px" @click="reset">
           Reset
-        </a-button>
+        </a-button>-->
       </div>
       <a-icon
         slot="filterIcon"
@@ -124,32 +124,35 @@ export default {
         {
           title: '监控用户',
           dataIndex: 'userName',
-          key: 'userName'
+          key: 'userName',
+          width:'200px',
         },
         {
           title: '监控类型',
           dataIndex: 'monitorType',
           key: 'monitorType',
+          width:'200px',
           filters: [
             { text: '大额交易监控', value: '大额交易监控' },
             { text: '地址异动监控', value: '地址异动监控' },
           ],
-          onFilter: (value, record) => record.monitorType.indexOf(value) === 0,
+          //onFilter: (value, record) => record.monitorType.indexOf(value) === 0,
         },
         {
           title: '监控事件',
           dataIndex: 'eventName',
           key: 'eventName',
+          width:'300px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
             customRender: 'customRender',
           },
-          onFilter: (value, record) =>
+          /*onFilter: (value, record) =>
             record.name
               .toString()
               .toLowerCase()
-              .includes(value.toLowerCase()),
+              .includes(value.toLowerCase()),*/
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
@@ -163,14 +166,16 @@ export default {
           title: '币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
+          width:'200px',
           filters: [],
-          onFilter: (value, record) => record.coinKind.indexOf(value) === 0,
+         // onFilter: (value, record) => record.coinKind.indexOf(value) === 0,
 
         },
         {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
+          width:'250px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -180,6 +185,7 @@ export default {
           title: '提醒时间',
           dataIndex: 'noticeTime',
           key: 'noticeTime',
+          align:'center',
           scopedSlots: {
             customRender: 'noticeTime',
           }
@@ -189,6 +195,102 @@ export default {
     };
   },
   methods: {
+    handleChange(pagination, filters, sorter, { currentDataSource }){
+      console.log('params', pagination, filters, sorter);
+      let filtersObj = [] ;
+      filtersObj=filters
+      console.log('1111')
+      console.log(filtersObj)
+      let trans,addr;
+      if(filtersObj.monitorType.length==1){
+        if(filtersObj.monitorType[0] == '大额交易监控'){
+          let name = sessionStorage.getItem('name');
+          this.$ajax({
+            method:"get",
+            url:'/monitor/admin/notice-logs',
+            params:{
+              userName:name,
+              monitorType:'trans',
+              eventName:'',
+              coinKind:'',
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          }).then(res=>{
+            if(res.data.code == '1001'){
+              this.dataList = res.data.data.data
+              this.total = res.data.data.total
+              for(let i = 0 ;i< this.dataList.length;i++) {
+                if (this.dataList[i].eventName != null) {
+                  this.dataList[i].monitorType = '地址异动监控'
+                } else {
+                  this.dataList[i].monitorType = '大额交易监控'
+                }
+              }
+            }
+          })
+        }
+        else {
+          let name = sessionStorage.getItem('name');
+          this.$ajax({
+            method:"get",
+            url:'/monitor/admin/notice-logs',
+            params:{
+              userName:name,
+              monitorType:'addr',
+              eventName:'',
+              coinKind:'',
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          }).then(res=>{
+            if(res.data.code == '1001'){
+              this.dataList = res.data.data.data
+              this.total = res.data.data.total
+              for(let i = 0 ;i< this.dataList.length;i++) {
+                if (this.dataList[i].eventName != null) {
+                  this.dataList[i].monitorType = '地址异动监控'
+                } else {
+                  this.dataList[i].monitorType = '大额交易监控'
+                }
+              }
+            }
+          })
+
+        }
+      }
+      else{
+        let name = sessionStorage.getItem('name');
+        this.$ajax({
+          method:"get",
+          url:'/monitor/admin/notice-logs',
+          params:{
+            userName:name,
+            monitorType:'',
+            eventName:'',
+            coinKind:'',
+            currentPage:this.currentPage,
+            pageSize:this.pageSize,
+          }
+        }).then(res=>{
+          if(res.data.code == '1001'){
+            this.dataList = res.data.data.data
+            this.total = res.data.data.total
+            for(let i = 0 ;i< this.dataList.length;i++) {
+              if (this.dataList[i].eventName != null) {
+                this.dataList[i].monitorType = '地址异动监控'
+              } else {
+                this.dataList[i].monitorType = '大额交易监控'
+              }
+            }
+          }
+        })
+      }
+      /*for(let i=0;i<filtersObj.monitorType.length;i++){
+        console.log(filtersObj.monitorType[i])
+      }*/
+
+    },
     searchEventAjax(){
       this.isEvent=true
       this.$ajax({
@@ -266,12 +368,62 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
+      let name = sessionStorage.getItem('name');
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/notice-logs',
+        params:{
+          userName:name,
+          monitorType:'',
+          eventName:this.searchEvent,
+          coinKind:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total = res.data.data.total
+          for(let i = 0 ;i< this.dataList.length;i++) {
+            if (this.dataList[i].eventName != null) {
+              this.dataList[i].monitorType = '地址异动监控'
+            } else {
+              this.dataList[i].monitorType = '大额交易监控'
+            }
+          }
+        }
+      })
     },
     handleReset(clearFilters) {
       clearFilters();
-      this.searchText = '';
+      this.searchEvent = '';
+      let name = sessionStorage.getItem('name');
+      //console.log(name)
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/notice-logs',
+        params:{
+          userName:name,
+          monitorType:'',
+          eventName:'',
+          coinKind:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total = res.data.data.total
+          for(let i = 0 ;i< this.dataList.length;i++) {
+            if (this.dataList[i].eventName != null) {
+              this.dataList[i].monitorType = '地址异动监控'
+            } else {
+              this.dataList[i].monitorType = '大额交易监控'
+            }
+          }
+        }
+      })
+
     },
     searchCoin(){
       // this.$parent.searchCoinInfo();

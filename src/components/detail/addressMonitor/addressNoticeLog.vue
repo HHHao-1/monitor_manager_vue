@@ -11,10 +11,10 @@
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
         style="padding: 8px"
       >
-        <!--<a-input
+        <a-input
           v-ant-ref="c => (searchInput = c)"
           :placeholder="`Search ${column.dataIndex}`"
-          :value="selectedKeys[0]"
+          v-model="searchEvent"
           style="width: 188px; margin-bottom: 8px; display: block;"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
@@ -30,8 +30,8 @@
         </a-button>
         <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
           Reset
-        </a-button>-->
-        <div >
+        </a-button>
+        <!--<div >
           <a-input
             style="width: 188px; margin-bottom: 8px; display: block;left:80px"
             placeholder="Search EventName"
@@ -51,7 +51,7 @@
           <a-button size="small" style="width: 90px;left:80px" @click="reset">
             Reset
           </a-button>
-        </div>
+        </div>-->
       </div>
       <a-icon
         slot="filterIcon"
@@ -125,12 +125,14 @@ export default {
         {
           title: '监控用户',
           dataIndex: 'userName',
-          key: 'userName'
+          key: 'userName',
+          width:'200px',
         },
         {
           title: '监控类型',
           dataIndex: 'monitorType',
           key: 'monitorType',
+          width:'200px',
           /*filters: [
             { text: '大额交易监控', value: '大额交易监控' },
             { text: '地址异动监控', value: '地址异动监控' },
@@ -140,6 +142,7 @@ export default {
           title: '监控事件',
           dataIndex: 'eventName',
           key: 'eventName',
+          width:'300px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
@@ -165,6 +168,7 @@ export default {
           title: '币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
+          width:'200px',
           /*filters: [
             { text: 'BTC', value: 'BTC' },
             { text: 'ETC', value: 'ETC' },
@@ -177,6 +181,7 @@ export default {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
+          width:'300px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -257,12 +262,54 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-     // this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
+      let id =sessionStorage.getItem('id');
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/notice-logs/addr',
+        params:{
+          ruleId:id,
+          userName:'',
+          eventName:this.searchEvent,
+          coinKind:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data;
+          this.total=res.data.data.total
+          for(let i= 0 ;i<this.dataList.length;i++) {
+            this.dataList[i].monitorType = '地址异动监控'
+          }
+        }
+      })
     },
     handleReset(clearFilters) {
       clearFilters();
-      this.searchText = '';
+      this.searchEvent = '';
+      let id =sessionStorage.getItem('id');
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/notice-logs/addr',
+        params:{
+          ruleId:id,
+          userName:'',
+          eventName:this.searchEvent,
+          coinKind:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        console.log(res)
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data;
+          this.total=res.data.data.total
+          for(let i= 0 ;i<this.dataList.length;i++) {
+            this.dataList[i].monitorType = '地址异动监控'
+          }
+        }
+      })
     },
     onChange(page,pageSize){
       console.log(page,pageSize)
