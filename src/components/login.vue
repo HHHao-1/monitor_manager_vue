@@ -2,7 +2,7 @@
   <div class="tm">
     <!--二维码-->
     <div class="containerT" :style="{height:height + 'px'}" v-show="tmshow == 1">
-      <h1 style="color: #fff">Chaindigg CBI</h1>
+      <h1 style="color: #fff">监控系统管理后台</h1>
       <div id="login_container"></div>
     </div>
     <!---->

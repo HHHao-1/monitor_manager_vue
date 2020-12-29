@@ -555,7 +555,7 @@ export default {
       let that = this;
       that.$ajax({
         method:"get",
-        url:'monitor/admin/coinmain',
+        url:'monitor/admin/coinlist',
       }).then(res=>{
         if(res.data.code==1001){
           that.coinList1 = res.data.data;
@@ -566,7 +566,7 @@ export default {
       let that = this;
       that.$ajax({
         method:"get",
-        url:'monitor/admin/coinmain',
+        url:'monitor/admin/coinlist',
       }).then(res=>{
         if(res.data.code==1001){
           that.coinList = res.data.data;
