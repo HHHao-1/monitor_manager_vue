@@ -184,82 +184,6 @@
 </template>
 <script>
 let flag=false
-/*const columns = [
-  {
-    title: 'AppID',
-    dataIndex: 'appId',
-    key: 'appId',
-  },
-  {
-    title: 'UID',
-    dataIndex: 'id',
-    key: 'id',
-
-  },
-  { title: '用户名',
-    dataIndex: 'name',
-    key: 'name',
-    scopedSlots: {
-      filterDropdown: 'filterDropdown',
-      filterIcon: 'filterIcon',
-      customRender: 'customRender',
-    },
-   /!* onFilter: (value, record) =>{
-      console.log(record)
-      console.log(value)
-      record.name
-        .toString()
-        .toLowerCase()
-        .includes(value.toLowerCase())
-    },*!/
-    onFilterDropdownVisibleChange: visible => {
-      if (visible) {
-        setTimeout(() => {
-          const input = document.getElementById("searchInput")
-          //input.focus()
-          // this.searchInput.focus();
-        }, 0);
-      }
-    },
-  },
-  {
-    title: '手机',
-    dataIndex: 'phone',
-    key: 'phone',
-  },
-  {
-    title: '邮箱',
-    dataIndex: 'email',
-    key: 'email',
-
-  },
-  {
-    title: '备注',
-    dataIndex: 'remark',
-    key: 'remark',
-
-  },
-
-  {
-    title: '状态',
-    key: 'state',
-    dataIndex: 'state',
-    scopedSlots:
-      {
-        customRender: 'state'
-      },
-  },
-  {
-    title: '操作',
-    key: 'action',
-    dataIndex:'',
-    scopedSlots:
-      {
-        customRender: 'action'
-      },
-  },
-];*/
-
 export default {
   name: "userMonitor",
   data() {
@@ -305,7 +229,7 @@ export default {
           title: 'AppID',
           dataIndex: 'appId',
           key: 'appId',
-          width:'100px',
+        //  width:'100px',
           align:'center'
 
         },
@@ -313,12 +237,12 @@ export default {
           title: 'UID',
           dataIndex: 'id',
           key: 'id',
-          width:'100px'
+        //  width:'100px'
         },
         { title: '用户名',
           dataIndex: 'name',
           key: 'name',
-          width:'150px',
+         // width:'150px',
 
           scopedSlots: {
             filterDropdown: 'filterDropdown',
@@ -326,8 +250,6 @@ export default {
             customRender: 'customRender',
           },
         /*/* onFilter: (value, record) =>{
-        console.log(record)
-        console.log(value)
         record.name
           .toString()
           .toLowerCase()
@@ -347,14 +269,14 @@ export default {
       title: '手机',
       dataIndex: 'phone',
       key: 'phone',
-      width:'220px',
+     // width:'220px',
       align:'center',
     },
     {
       title: '邮箱',
       dataIndex: 'email',
       key: 'email',
-      width:'250px',
+     // width:'250px',
       align:'center',
 
     },
@@ -362,7 +284,7 @@ export default {
       title: '备注',
       dataIndex: 'remark',
       key: 'remark',
-      width:'200px',
+      //width:'200px',
       align:'center',
 
     },
@@ -371,7 +293,7 @@ export default {
       title: '状态',
       key: 'state',
       dataIndex: 'state',
-      width:'200px',
+      //width:'200px',
       align:'center',
       scopedSlots:
       {
@@ -417,7 +339,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -433,10 +354,9 @@ export default {
       this.getDataList();
     },
     onChangeP(pageNumber) {
-      console.log('Page: ', pageNumber);
+     //
     },
     edit(name , phone , email , remark, id ){
-      console.log("edit click")
       this.uploadData.id = id
       this.uploadData.name= name;
       this.uploadData.phone = phone;
@@ -458,7 +378,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -478,11 +397,9 @@ export default {
         }
       }).then(res=>{
         if(res.data.code=='1001'){
-          // that.$message.success(res.data.msg);
           alert('添加成功')
           this.getDataList();
         }else{
-          // that.$message.success(res.data.msg);
           alert('添加失败')
         }
       })
@@ -555,10 +472,7 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      console.log(dataIndex)// 这就是table culums 的属性名称
       this.searchText = selectedKeys[0];
-      console.log('11111')
-      console.log(this.searchText)
       this.$ajax({
         method:"get",
         url:'/monitor/admin/users',
@@ -568,7 +482,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -591,7 +504,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -603,7 +515,7 @@ export default {
 
     },
     onChange(page,pageSize){
-      console.log(page,pageSize)
+      console.log('1232131')
       this.currentPage=page;
       if(this.isUserName){
         this.searchNameAjax()
@@ -613,7 +525,6 @@ export default {
 
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getDataList();
     },
@@ -658,7 +569,7 @@ export default {
       //
     },
     gotoLog(name){
-      sessionStorage.setItem('name',name);
+      sessionStorage.setItem('name1',name);
       this.$router.replace('/userNoticeLog')
     },
     statePoint(state){

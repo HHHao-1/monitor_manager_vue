@@ -160,20 +160,20 @@
       methods: {
 
         handleClick2 (e) {
-          console.log('click ', e)
+
           this.current = e.key;
           this.$router.push({name:e.key})
         },
         handleClick (e) {
-          console.log('click ', e)
+
           this.current = e.key;
           this.$router.push({name:e.key})
         },
         onCollapse(collapsed, type) {
-          console.log(collapsed, type);
+
         },
         onBreakpoint(broken) {
-          console.log(broken);
+
         },
         showDeleteConfirm() {
           let that = this;
@@ -190,7 +190,7 @@
               sessionStorage.setItem("login","0")
             },
             onCancel() {
-              console.log('Cancel');
+
             },
           });
         },
@@ -229,7 +229,6 @@
       watch:{
         $route: {
           handler: function(val, oldVal){
-            console.log(val);
             let arr = [];
             arr.push(val.name);
             this.selectedKeys = arr;

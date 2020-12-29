@@ -25,7 +25,7 @@
         <p class="tmp3">
           <a-form-item label="主链:" v-bind="formItemLayout">
             <a-select style="width: 300px" placeholder="请选择" v-model="uploadData.mainChain"   v-decorator="['mainChain',{rules: [{required: true,whitespace: true,message: '请选择主链',},],},]">
-              <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
+              <a-select-option v-for="(item,i) in getStrList(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
             </a-select>
           </a-form-item>
         </p>
@@ -64,7 +64,7 @@
         <p class="tmp3">
           <a-form-item label="主链:" v-bind="formItemLayout">
             <a-select style="width: 300px" placeholder="请选择" v-model="uploadData.mainChain"   v-decorator="['mainChain',{rules: [{required: true,whitespace: true,message: '请选择主链',},],},]">
-              <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
+              <a-select-option v-for="(item,i) in getStrList(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
             </a-select>
           </a-form-item>
         </p>
@@ -101,6 +101,7 @@
   </div>
 </template>
 <script>
+import { Message } from 'element-ui'
 export default {
   data() {
     return {
@@ -145,7 +146,7 @@ export default {
           title: '主链',
           dataIndex: 'mainChain',
           key: 'mainChain',
-          width:'300px',
+        //  width:'300px',
           filters:[],
           onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
         },
@@ -153,7 +154,7 @@ export default {
           title: '币种名称',
           dataIndex: 'coinName',
           key: 'coinName',
-          width:'300px',
+        //  width:'300px',
           filters: [],
           onFilter: (value, record) => record.coinName.indexOf(value) === 0,
         },
@@ -161,13 +162,13 @@ export default {
           title: '合约地址',
           dataIndex: 'contractAddr',
           key: 'contractAddr',
-          width:'400px',
+        //  width:'400px',
         },
         {
           title: '小数位',
           dataIndex: 'point',
           key: 'point',
-          width:'200px',
+        //  width:'200px',
         },
         {
           title: '操作',
@@ -183,13 +184,24 @@ export default {
   },
 
   methods: {
+    getStrList(array){
+      let list=[];
+      let str;
+      let strAll='';
+      Object.keys(array).forEach(key=>{
+        if(array[key][0] == '0' &&  array[key][1] =='x'){
+          array[key]= array[key].slice(2)
+        }
+        str = array[key];
+        list.push(str)
+      })
+      return this.unique(list)
+    },
     onChange(page,pageSize){
-      console.log(page,pageSize)
       this.currentPage=page;
       this.getDataList();
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getDataList();
     },
@@ -205,7 +217,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -260,8 +271,10 @@ export default {
 
     },
     deleteDataList(mainChain,coinName,contractAddr,point){
-      let that = this;
-      that.$ajax({
+      /*if(mainChain=='LTC' || mainChain=='BTC' || mainChain=='ETH' || mainChain=='BCH'){
+         Message.error('该币种不能删除！')
+      }*/
+      this.$ajax({
         method:"delete",
         url:'/monitor/admin/coin-kinds',
         params:{
@@ -272,7 +285,7 @@ export default {
         }
       }).then(res=>{
         if(res.data.code==1001){
-          that.getDataList();
+          this.getDataList();
           alert('删除成功');
         }
         else {
@@ -283,10 +296,11 @@ export default {
     searchCoinInfo(){
       this.$ajax({
         method:"get",
-        url:'monitor/admin/coinlist',
+        url:'monitor/admin/coinmain',
       }).then(res=>{
         if(res.data.code==1001){
           this.mainChainList2 = res.data.data;
+          this.mainChainList2=this.getStrList(this.mainChainList2)
           Object.keys(this.mainChainList2).forEach(key=>{
             let filterList = {
               text:this.mainChainList2[key],
@@ -300,7 +314,7 @@ export default {
     searchCoinInfo2(){
       this.$ajax({
         method:"get",
-        url:'monitor/admin/coinlist',
+        url:'monitor/admin/coinmain',
       }).then(res=>{
         if(res.data.code==1001){
           this.mainChainList = res.data.data;
@@ -314,6 +328,22 @@ export default {
     searchCoinKindNameList(){
       this.$ajax({
         method:"get",
+        url:'monitor/admin/coinlist',
+      }).then(res=>{
+        if(res.data.code==1001){
+          this.mainChainList2 = res.data.data;
+          this.mainChainList2=this.getStrList(this.mainChainList2)
+          Object.keys(this.mainChainList2).forEach(key=>{
+            let filterList = {
+              text:this.mainChainList2[key],
+              value:this.mainChainList2[key]
+            }
+            this.columns[1].filters.push(filterList)
+          })
+        }
+      })
+      /*this.$ajax({
+        method:"get",
         url:'/monitor/admin/coin-kinds',
         params:{
           event:'',
@@ -323,9 +353,9 @@ export default {
           pageSize:this.total,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.coinKindNameList = res.data.data.data
+          this.coinKindNameList=this.getStrList(this.coinKindNameList)
           Object.keys(this.coinKindNameList).forEach(key=>{
             let filterList = {
               text:this.coinKindNameList[key].coinName,
@@ -335,7 +365,7 @@ export default {
           })
 
         }
-      })
+      })*/
     },
     unique(array) {
       return Array.from(new Set(array));
@@ -375,7 +405,6 @@ export default {
     showModal() {
       this.searchCoinInfo2()
       this.visible = true;
-      this.searchCoinInfo();
       this.uploadData = {
         mainChain:'',
         tokenName:'',
@@ -388,7 +417,7 @@ export default {
       //this.fileList = [];
     },
     edit(id,mainChain,tokenName,contractAddr,point){
-      this.searchCoinInfo();
+      this.searchCoinInfo2();
       this.uploadData.id = id
       this.uploadData.mainChain= mainChain;
       this.uploadData.tokenName = tokenName;
@@ -423,6 +452,9 @@ export default {
     this.getDataList();
     this.searchCoinInfo();
     this.searchCoinKindNameList();
+    /*let a = ['0x11','0x11','0x22']
+    this.getStrList(a)
+    console.log('11',this.getStrList(a))*/
   }
 };
 </script>

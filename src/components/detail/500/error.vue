@@ -13,7 +13,7 @@
         }
       },
       mounted(){
-        console.log(this.params);
+        //console.log(this.params);
       }
     }
 </script>

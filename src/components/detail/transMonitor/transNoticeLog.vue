@@ -138,13 +138,13 @@ export default {
           title: '监控用户',
           dataIndex: 'userName',
           key: 'userName',
-          width:'250px',
+       //   width:'250px',
         },
         {
           title: '监控类型',
           dataIndex: 'monitorType',
           key: 'monitorType',
-          width:'250px',
+        //  width:'250px',
           /*filters: [
             { text: '大额交易监控', value: '大额交易监控' },
             { text: '地址异动监控', value: '地址异动监控' },
@@ -155,7 +155,7 @@ export default {
           title: '币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
-          width:'200px',
+         // width:'200px',
           /*filters: [
             { text: 'BTC', value: 'BTC' },
             { text: 'ETC', value: 'ETC' },
@@ -168,7 +168,7 @@ export default {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
-          width:'300px',
+        //  width:'300px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -187,30 +187,95 @@ export default {
     };
   },
   methods: {
-    getTransLogList(){
-     // let name = sessionStorage.getItem('name');
+    /*getTransLogList(){
       let id =sessionStorage.getItem('id');
-      let that = this;
-      that.$ajax({
+      let coinArr=[];
+      let str;
+      let strAll='';
+      this.$ajax({
         method:"get",
-        url:'/monitor/admin/notice-logs/trans',
-        params:{
-          ruleId:id,
-          userName:name,
-          coinKind:'',
-          currentPage:that.currentPage,
-          pageSize:that.pageSize,
-        }
+        url:'monitor/admin/coinmain',
       }).then(res=>{
-        console.log(res)
-        if(res.data.code == '1001'){
-          that.dataList = res.data.data.data
-          that.total=res.data.data.total
-          for(let i= 0 ;i<that.dataList.length;i++) {
-            that.dataList[i].monitorType = '大额交易监控'
+        if(res.data.code==1001){
+          coinArr= res.data.data;
+          Object.keys(coinArr).forEach(key=>{
+            if(coinArr[key][0] == '0' &&  coinArr[key][1] =='x'){
+              coinArr[key]= coinArr[key].slice(2)
+            }
+            str = coinArr[key]+','
+            strAll = strAll+ str
+            })
+              this.$ajax({
+                method:"get",
+                url:'/monitor/admin/notice-logs/trans',
+                params:{
+                  ruleId:id,
+                  userName:name,
+                  coinKind:strAll,
+                  currentPage:this.currentPage,
+                  pageSize:this.pageSize,
+                }
+              }).then(res=>{
+                if(res.data.code == '1001'){
+                  this.dataList = res.data.data.data
+                  this.total=res.data.data.total
+                  for(let i= 0 ;i<this.dataList.length;i++) {
+                    this.dataList[i].monitorType = '大额交易监控'
+                  }
+                }
+              })
+          }
+      })
+
+    },*/
+    async getTransLogList(){
+      let id =sessionStorage.getItem('id');
+      const coinmain =await  this.$ajax.get('monitor/admin/coinmain')
+      const {code,data} =coinmain.data
+      if(code ==1001){
+        const coins = data.map(item => {
+          return item
+        }).join(',')
+        const  coin = await this.$ajax.get('/monitor/admin/coincontract',{
+          params:{
+            coins,
+          }
+        })
+        const {data: coinData,code : coinCode}=coin.data
+        if(coinCode == 1001){
+          const coinKind = coinData.map(item => {
+            return item
+          }).join(',')
+          const dataList = await this.$ajax.get('/monitor/admin/notice-logs/trans',{
+            params:{
+              ruleId:id,
+              userName:name,
+              coinKind,
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data: noticeData,code : noticeCode}=dataList.data
+          if(noticeCode == '1001'){
+            this.dataList = noticeData.data.map(item => {
+              if (item.eventName != null) {
+                item.monitorType = '地址异动监控'
+              } else {
+                item.monitorType = '大额交易监控'
+              }
+              return item
+            })
+            Object.keys(this.dataList).forEach(key=>{
+              console.log(this.dataList[key].coinKind)
+              if(this.dataList[key].coinKind.startsWith('0x')){
+                this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+              }
+            })
+            this.total = noticeData.total
           }
         }
-      })
+
+      }
     },
     gotoBack(){
       this.$router.replace('/transMonitor');
@@ -225,23 +290,19 @@ export default {
       this.searchText = '';
     },
     onChange(page,pageSize){
-      console.log(page,pageSize)
       this.currentPage=page;
       this.getTransLogList();
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getTransLogList();
     },
-    searchCoinInfo(){
-      this.$ajax({
+    /*searchCoinInfo(){
+      /!*this.$ajax({
         method:"get",
-        url:'/monitor/admin/coinlist',
+        url:'/monitor/admin/coinmain',
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
-          console.log(res.data.data)
           this.dataList1 = res.data.data
           Object.keys(this.dataList1).forEach(key=>{
             let filterList = {
@@ -250,9 +311,45 @@ export default {
             }
             this.columns[2].filters.push(filterList)
           })
+
+        }
+      })
+    },*!/
+  },*/
+    searchCoinInfo(){
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/coinmain',
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          const { data } = res.data
+          this.dataList1 = data.map(item => {
+            if (item.startsWith('0x')) {
+              return {
+                text: item.substring(2, item.length),
+                value: item
+              }
+            }
+            return {
+              text: item,
+              value: item
+            }
+          })
+          let obj = {};
+          let result = [];
+          for(let i =0; i<this.dataList1.length; i++){
+            if(!obj[this.dataList1[i].text]){
+              result.push(this.dataList1[i]);
+              obj[this.dataList1[i].text] = true;
+            }
+          }
+          console.log(result)
+          this.columns[2].filters = result
+
         }
       })
     },
+
   },
   filters:{
     timeFilter(time){

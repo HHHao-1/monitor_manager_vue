@@ -180,7 +180,6 @@ export default {
           apply:0
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code === 0){
           // that.$message.success(res.data.msg);
           alert('成功开通用户权限')

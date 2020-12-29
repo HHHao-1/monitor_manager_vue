@@ -126,13 +126,13 @@ export default {
           title: '监控用户',
           dataIndex: 'userName',
           key: 'userName',
-          width:'200px',
+        //  width:'200px',
         },
         {
           title: '监控类型',
           dataIndex: 'monitorType',
           key: 'monitorType',
-          width:'200px',
+        //  width:'200px',
           /*filters: [
             { text: '大额交易监控', value: '大额交易监控' },
             { text: '地址异动监控', value: '地址异动监控' },
@@ -142,7 +142,7 @@ export default {
           title: '监控事件',
           dataIndex: 'eventName',
           key: 'eventName',
-          width:'300px',
+        //  width:'300px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
@@ -168,7 +168,7 @@ export default {
           title: '币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
-          width:'200px',
+        //  width:'200px',
           /*filters: [
             { text: 'BTC', value: 'BTC' },
             { text: 'ETC', value: 'ETC' },
@@ -181,7 +181,7 @@ export default {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
-          width:'300px',
+       //   width:'300px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -200,32 +200,112 @@ export default {
     };
   },
   methods: {
-    getAddrLogList(){
-      let id =sessionStorage.getItem('id');
-      //let name = sessionStorage.getItem('name');
-      console.log(name)
-      let that = this;
-      that.$ajax({
-        method:"get",
-        url:'/monitor/admin/notice-logs/addr',
-        params:{
-          ruleId:id,
-          userName:'',
-          eventName:'',
-          coinKind:'',
-          currentPage:that.currentPage,
-          pageSize:that.pageSize,
+    getStrList(array){
+      let list=[];
+      let str;
+      let strAll='';
+      Object.keys(array).forEach(key=>{
+        if(array[key][0] == '0' &&  array[key][1] =='x'){
+          array[key]= array[key].slice(2)
         }
+        str = array[key];
+        list.push(str)
+      })
+      return this.unique(list)
+    },
+    /*getAddrLogList(){
+      let id =sessionStorage.getItem('id');
+
+      let coinArr=[];
+      let str;
+      let strAll='';
+      this.$ajax({
+        method:"get",
+        url:'monitor/admin/coinmain',
       }).then(res=>{
-        console.log(res)
-        if(res.data.code == '1001'){
-          that.dataList = res.data.data.data;
-          that.total=res.data.data.total
-          for(let i= 0 ;i<that.dataList.length;i++) {
-            that.dataList[i].monitorType = '地址异动监控'
+        if(res.data.code==1001){
+          coinArr= res.data.data;
+          Object.keys(coinArr).forEach(key=>{
+            if(coinArr[key][0] == '0' &&  coinArr[key][1] =='x'){
+              coinArr[key]= coinArr[key].slice(2)
+            }
+            str = coinArr[key]+','
+            strAll = strAll+ str
+          })
+            this.$ajax({
+              method:"get",
+              url:'/monitor/admin/notice-logs/addr',
+              params:{
+                ruleId:id,
+                userName:'',
+                eventName:'',
+                coinKind:strAll,
+                currentPage:this.currentPage,
+                pageSize:this.pageSize,
+              }
+            }).then(res=>{
+              if(res.data.code == '1001'){
+                this.dataList = res.data.data.data;
+                this.total=res.data.data.total
+                for(let i= 0 ;i<this.dataList.length;i++) {
+                  this.dataList[i].monitorType = '地址异动监控'
+                }
+              }
+            })
+          }
+      })
+
+
+    },*/
+    async getAddrLogList(){
+      let id =sessionStorage.getItem('id2');
+      const coinmain =await  this.$ajax.get('monitor/admin/coinmain')
+      const {code,data} =coinmain.data
+      if(code ==1001){
+        const coins = data.map(item => {
+          return item
+        }).join(',')
+        const  coin = await this.$ajax.get('/monitor/admin/coincontract',{
+          params:{
+            coins,
+          }
+        })
+        const {data: coinData,code : coinCode}=coin.data
+        if(coinCode == 1001){
+          const coinKind = coinData.map(item => {
+            return item
+          }).join(',')
+          const dataList = await this.$ajax.get('/monitor/admin/notice-logs/addr',{
+            params:{
+              ruleId:id,
+              userName:'',
+              eventName:'',
+              coinKind,
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data: noticeData,code : noticeCode}=dataList.data
+          if(noticeCode == '1001'){
+            this.dataList = noticeData.data.map(item => {
+              if (item.eventName != null) {
+                item.monitorType = '地址异动监控'
+              } else {
+                item.monitorType = '大额交易监控'
+              }
+              return item
+            })
+            Object.keys(this.dataList).forEach(key=>{
+              console.log(this.dataList[key].coinKind)
+              if(this.dataList[key].coinKind.startsWith('0x')){
+                this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+              }
+            })
+            this.total = noticeData.total
           }
         }
-      })
+
+      }
     },
     searchEventAjax(){
       this.isEvent=true
@@ -239,7 +319,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total = res.data.data.total
@@ -253,10 +332,6 @@ export default {
       this.searchEvent = '';
       this.getAddrLogList();
     },
-    /*searchCoinInfo(i){
-      //this.$parent.searchCoinInfo(i);
-      this.$emit('searchCoinInfo')
-    },*/
     gotoBack(){
       this.$router.replace('/addressMonitor');
     },
@@ -275,7 +350,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data;
           this.total=res.data.data.total
@@ -301,7 +375,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data;
           this.total=res.data.data.total
@@ -312,7 +385,6 @@ export default {
       })
     },
     onChange(page,pageSize){
-      console.log(page,pageSize)
       this.currentPage=page;
       if(this.isEvent) {
         this.searchEventAjax()
@@ -322,27 +394,57 @@ export default {
       }
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getAddrLogList();
     },
-    searchCoinInfo(){
-
+    /*searchCoinInfo(){
       this.$ajax({
         method:"get",
-        url:'/monitor/admin/coinlist',
+        url:'/monitor/admin/coinmain',
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
-          console.log(res.data.data)
           this.dataList1 = res.data.data
+          //this.dataList1=this.getStrList(this.dataList1)
           Object.keys(this.dataList1).forEach(key=>{
             let filterList = {
               text:this.dataList1[key],
               value:this.dataList1[key]
             }
-            //that.columns[3].filters.push(filterList)
+            this.columns[3].filters.push(filterList)
           })
+        }
+      })
+    },*/
+    searchCoinInfo(){
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/coinmain',
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          const { data } = res.data
+          this.dataList1 = data.map(item => {
+            if (item.startsWith('0x')) {
+              return {
+                text: item.substring(2, item.length),
+                value: item
+              }
+            }
+            return {
+              text: item,
+              value: item
+            }
+          })
+          let obj = {};
+          let result = [];
+          for(let i =0; i<this.dataList1.length; i++){
+            if(!obj[this.dataList1[i].text]){
+              result.push(this.dataList1[i]);
+              obj[this.dataList1[i].text] = true;
+            }
+          }
+          console.log(result)
+          this.columns[3].filters = result
+
         }
       })
     },

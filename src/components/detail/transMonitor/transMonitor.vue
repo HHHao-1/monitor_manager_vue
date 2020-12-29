@@ -4,7 +4,7 @@
       <h2>大额交易监控规则管理</h2>
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
-    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" @change="handleChange">
+    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -119,7 +119,7 @@
         <p class="tmp3">
           <a-form-item label="币种" v-bind="formItemLayout">
             <a-select style="width: 300px"  v-model="uploadData.coinKind"  placeholder="请选择"  v-decorator="['coinKind',{rules: [{required: true,whitespace: true,message: '请选择币种',},],},]">
-              <a-select-option v-for="(item,i) in unique(coinList)" :value="item" :key="i" >
+              <a-select-option v-for="(item,i) in getStrList(coinList)" :value="item" :key="i" >
                 {{item}}
               </a-select-option>
             </a-select>
@@ -173,7 +173,7 @@
         <p class="tmp3">
           <a-form-item label="币种" v-bind="formItemLayout">
             <a-select style="width: 300px" v-model="uploadData2.coinKind"  placeholder="请选择" v-decorator="['coinKind',{rules: [{required: true,whitespace: true,message: '请选择币种',},],},]">
-              <a-select-option v-for="(item,i) in unique(coinList)" :value="item" :key="i" >
+              <a-select-option v-for="(item,i) in getStrList(coinList1)" :value="item" :key="i" >
                 {{item}}
               </a-select-option>
             </a-select>
@@ -270,6 +270,7 @@ export default {
       dataList:[],
       userList:[],
       coinList:[],
+      coinList1:[],
       dataList1:[],
       data,
       searchText: '',
@@ -316,7 +317,7 @@ export default {
           title: '监控用户',
           dataIndex: 'name',
           key: 'name',
-          width:'200px',
+        //  width:'200px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
@@ -341,7 +342,7 @@ export default {
           title: '监控币种',
           dataIndex: 'coinKind',
           key: 'coinKind',
-          width:'200px',
+        //  width:'200px',
           // filters: (() => {return this.aaa})(),
           filters:[],
           onFilter: (value, record) => record.coinKind.indexOf(value) === 0,
@@ -350,13 +351,13 @@ export default {
           title: '阈值',
           dataIndex: 'monitorMinVal',
           key: 'monitorMinVal',
-          width:'200px',
+        //  width:'200px',
         },
         {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
-          width:'250px',
+        //  width:'250px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -365,7 +366,7 @@ export default {
           title: '添加时间',
           dataIndex: 'eventAddTime',
           key: 'eventAddTime',
-          width:'220px',
+       //  width:'220px',
           scopedSlots: {
             customRender: 'eventAddTime',
           }
@@ -374,7 +375,7 @@ export default {
           title: '状态',
           dataIndex: 'state',
           key: 'state',
-          width:'180px',
+       //   width:'180px',
           scopedSlots: {
             customRender: 'state',
           }
@@ -399,16 +400,45 @@ export default {
     }
   },
   methods: {
-    /*handleChange(pagination, filters, sorter, { currentDataSource }){
-      console.log('params', pagination, filters, sorter);
-      let filtersObj = [] ;
-      filtersObj=filters
-      console.log('1111')
-      console.log(filtersObj)
+    getStrList(array){
+      let list=[];
+      let str;
+      let strAll='';
+      Object.keys(array).forEach(key=>{
+        if(array[key][0] == '0' &&  array[key][1] =='x'){
+          array[key]= array[key].slice(2)
+        }
+        str = array[key];
+        list.push(str)
+      })
+      return this.unique(list)
+    },
+    handleChange(pagination, filters, sorter, { currentDataSource }){
+      let coinArr =[];
+      let filtersObj = {};
+      console.log(filters);
+      filtersObj={...filters};
       for(let i=0;i<filtersObj.coinKind.length;i++){
         console.log(filtersObj.coinKind[i])
+        coinArr.push(filtersObj.coinKind[i])
       }
-    },*/
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/trans-rules',
+        params:{
+          coin:coinArr,
+          userName:'',
+          userId:'',
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+      })
+    },
     searchNameAjax(){
       this.isMonitorName=true
       this.$ajax({
@@ -422,7 +452,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total = res.data.data.total
@@ -437,7 +466,6 @@ export default {
       this.getDataList();
     },
     onChange(page,pageSize){
-      console.log(page,pageSize)
       this.currentPage=page;
       if(this.isMonitorName){
         this.searchNameAjax()
@@ -446,58 +474,103 @@ export default {
       }
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getDataList();
     },
     getDataList(){
-      let that = this;
-      that.$ajax({
-        method:"get",
-        url:'/monitor/admin/trans-rules',
-        params:{
-          coin:'',
-          userName:'',
-          userId:'',
-          currentPage:that.currentPage,
-          pageSize:that.pageSize,
-        }
-      }).then(res=>{
-        console.log(res)
-        if(res.data.code == '1001'){
-          that.dataList = res.data.data.data
-          that.total=res.data.data.total
-        }
-      })
-    },
+        let coinArr=[];
+        let coinArr2=[];
+        let str;
+        let str2;
+        let strAll='';
+        let strAll2='';
+        this.$ajax({
+          method:"get",
+          url:'monitor/admin/coinmain',
+        }).then(res=>{
+          if(res.data.code==1001){
+            coinArr= res.data.data;
+            Object.keys(coinArr).forEach(key=>{
+              str = coinArr[key]+','
+              strAll = strAll+ str
+            })
+            this.$ajax({
+              method:"get",
+              url:'/monitor/admin/coincontract',
+              params:{
+                coins:strAll,
+              }
+            }).then(res=>{
+              if(res.data.code == 1001){
+                coinArr2= res.data.data
+                Object.keys(coinArr2).forEach(key=>{
+                  str2 = coinArr2[key]+','
+                  strAll2 = strAll2+ str2
+                })
+                this.$ajax({
+                  method:"get",
+                  url:'/monitor/admin/trans-rules',
+                  params:{
+                    coin:strAll2,
+                    userName:'',
+                    userId:'',
+                    currentPage:this.currentPage,
+                    pageSize:this.pageSize,
+                  }
+                }).then(res=>{
+                  if(res.data.code == '1001'){
+                    this.dataList = res.data.data.data
+                    Object.keys(this.dataList).forEach(key=>{
+                      console.log(this.dataList[key].coinKind)
+                      if(this.dataList[key].coinKind.startsWith('0x')){
+                        this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+                      }
+                    })
+                    this.total=res.data.data.total
+                  }
+                })
+              }
+            })
+          }
+        })
+      },
     //监控用户的下拉列表查询方法
     searchUserName(){
       this.$ajax({
         method:"get",
         url:'/monitor/admin/users/list',
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList1= res.data.data.data
           Object.keys(this.dataList1).forEach(key=>{
             let name = this.dataList1[key].name
-            // let coin = this.dataList1[key].coinKind
             this.userList.push(name)
-            // this.coinList.push(coin)
 
           })
         }
       })
     },
     //币种下拉查询
+    searchCoin1(){
+      let that = this;
+      that.$ajax({
+        method:"get",
+        url:'monitor/admin/coinmain',
+      }).then(res=>{
+        if(res.data.code==1001){
+          that.coinList1 = res.data.data;
+        }
+      })
+    },
     searchCoin(){
       let that = this;
       that.$ajax({
         method:"get",
-        url:'monitor/admin/coinlist',
+        url:'monitor/admin/coinmain',
       }).then(res=>{
         if(res.data.code==1001){
           that.coinList = res.data.data;
+          this.coinList = this.getStrList(this.coinList)
           Object.keys(that.coinList).forEach(key=>{
             let filterList = {
               text:that.coinList[key],
@@ -511,7 +584,7 @@ export default {
     //添加
     addTransDataList(){
       let notice
-        let mid=this.uploadData.noticeWay
+      let mid=this.uploadData.noticeWay
       switch(mid.length){
         case 1:
           notice = new Number(mid[0]);
@@ -541,7 +614,7 @@ export default {
         monitorMinVal
         constructor(userName,coinKind,noticeWay,monitorMinVal){
           this.userName=userName;
-          this.coinKind=coinKind;
+          this.coinKind='0x'+coinKind;
           this.noticeWay=noticeWay;
           this.monitorMinVal=monitorMinVal;
         }
@@ -569,7 +642,6 @@ export default {
     // 修改
     updataList(){
       let notice
-      console.log(this.uploadData2.noticeWay)
       let mid=this.uploadData2.noticeWay
       switch(mid.length){
         case 1:
@@ -602,7 +674,7 @@ export default {
         constructor(uid,idTEST,coinKind,noticeWay,monitorMinVal){
           this.uid = uid
           this.id=0;
-          this.coinKind=coinKind;
+          this.coinKind='0x'+coinKind;
           this.noticeWay=noticeWay;
           this.monitorMinVal=monitorMinVal;
         }
@@ -625,7 +697,7 @@ export default {
       })
     },
     edit(id,name,coinKind,monitorMinVal,noticeWay){
-      this.searchCoin()
+      this.searchCoin1()
       this.searchUserName()
       this.uploadData2.id = id
       this.uploadData2.name= name;
@@ -765,7 +837,7 @@ export default {
       this.allowClear=true;
 
       this.searchUserName();
-      this.searchCoin();
+      this.searchCoin1();
       this.uploadData = {
         name:null,
         coinKind:'',
@@ -789,7 +861,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -811,7 +882,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -867,23 +937,6 @@ export default {
   mounted() {
     this.getDataList();
     this.searchCoin();
-    /*let that = this;
-    that.$ajax({
-      method:"get",
-      url:'/monitor/admin/coinlist',
-    }).then(res=>{
-      console.log(res)
-      if(res.data.code == '1001'){
-        that.dataList1 = res.data.data
-        Object.keys(that.dataList1).forEach(key=>{
-          let filterList = {
-            text:that.dataList1[key],
-            value:that.dataList1[key]
-          }
-          //that.columns[1].filters.push(filterList)
-        })
-      }
-    })*/
   }
 };
 </script>

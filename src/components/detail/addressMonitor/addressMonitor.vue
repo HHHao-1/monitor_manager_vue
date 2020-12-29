@@ -621,7 +621,7 @@ export default {
           title: '监控用户',
           dataIndex: 'name',
           key: 'name',
-          width:'200px',
+         // width:'200px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
@@ -641,7 +641,7 @@ export default {
           title: '监控事件',
           dataIndex: 'eventName',
           key: 'eventName',
-          width:'250px',
+        //  width:'250px',
           scopedSlots: {
             filterDropdown: 'filterDropdown1',
             filterIcon: 'filterIcon',
@@ -661,7 +661,7 @@ export default {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
-          width:'300px',
+        //  width:'300px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
@@ -670,7 +670,7 @@ export default {
           title: '添加时间',
           dataIndex: 'eventAddTime',
           key: 'eventAddTime',
-          width:'250px',
+        //  width:'250px',
           scopedSlots: {
             customRender: 'eventAddTime',
           }
@@ -679,7 +679,7 @@ export default {
           title: '状态',
           dataIndex: 'state',
           key: 'state',
-          width:'200px',
+       //   width:'200px',
           scopedSlots: {
             customRender: 'state',
           }
@@ -715,17 +715,15 @@ export default {
     this.form = this.$form.createForm(this, { name: 'dynamic_form_item' });
     this.editForm = this.$form.createForm(this, { name: 'coordinated' });
     this.form.getFieldDecorator('keys', { initialValue: [], preserve: true });
-    console.log('hello')
-    console.log(this.form.getFieldValue('keys')[0]);
     this.editForm.getFieldDecorator('keys1', { initialValue: [], preserve: true });
     /*this.$nextTick(_ => {
       this.editForm.setFieldsValue(this.uploadData2)
     })*/
   },
   methods: {
+
     validataAddr1(){
       for(let i=0;i<this.dataObj1.address.length;i++) {
-        console.log(this.dataObj1.address[i])
         if (this.dataObj1.address[i]=="") {
           setTimeout(function () {
             document.getElementById("va").style.color = "red";
@@ -744,7 +742,6 @@ export default {
       let temp=[];
       for(let i=0;i<this.dataObj.address.length;i++) {
         if (this.dataObj.address[i]=="") {
-          console.log(this.dataObj.address[i])
           temp[i]=document.getElementsByName(this.va2)[i];
           setTimeout(function () {
             temp[i].style.display="block"
@@ -760,26 +757,6 @@ export default {
         }
       }
     },
-    /*validataAddr2(){
-      let temp=[];
-      for(let i=0;i<this.dataObj.address.length;i++) {
-        if (this.dataObj.address[i]=="") {
-          console.log(this.dataObj.address[i])
-          temp[i]=document.getElementsByName(this.va2)[i];
-          setTimeout(function () {
-            temp[i].style.display="block"
-          }, 0);
-          this.isValidata2=true;
-        }
-        else  {
-          temp[i]=document.getElementsByName(this.va2)[i];
-          setTimeout(function () {
-            temp[i].style.display="none"
-          }, 0);
-          this.isValidata2=false;
-        }
-      }
-    },*/
     searchNameAjax(){
       this.isName = true
       this.$ajax({
@@ -793,7 +770,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total = res.data.data.total
@@ -817,7 +793,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total = res.data.data.total
@@ -846,7 +821,6 @@ export default {
           name:this.searchVal
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           alert(res.data.data)
         }
@@ -869,7 +843,6 @@ export default {
           pageSize:that.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           that.dataList = res.data.data.data
           that.total=res.data.data.total
@@ -1235,7 +1208,7 @@ export default {
     },
 
     gotoLog(id){
-      sessionStorage.setItem('id',id);
+      sessionStorage.setItem('id2',id);
       //sessionStorage.setItem('name',name);
       this.$router.replace('/addressNoticeLog')
     },
@@ -1282,7 +1255,6 @@ export default {
             pageSize:this.pageSize,
           }
         }).then(res=>{
-          console.log(res)
           if(res.data.code == '1001'){
             this.dataList = res.data.data.data
             this.total=res.data.data.total
@@ -1301,7 +1273,6 @@ export default {
             pageSize:this.pageSize,
           }
         }).then(res=>{
-          console.log(res)
           if(res.data.code == '1001'){
             this.dataList = res.data.data.data
             this.total=res.data.data.total
@@ -1326,7 +1297,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
@@ -1336,7 +1306,6 @@ export default {
     },
 
     onChange(page,pageSize){
-      console.log(page,pageSize)
       this.currentPage=page;
       if(this.isName){
         this.searchNameAjax()
@@ -1348,18 +1317,17 @@ export default {
       }
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getDataList();
     },
     handleChange(value) {
-      console.log(`selected ${value}`);
+     //
     },
     handleBlur() {
-      console.log('blur');
+     //
     },
     handleFocus() {
-      console.log('focus');
+      //
     },
     filterOption(input, option) {
       return (
