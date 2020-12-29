@@ -335,7 +335,7 @@ export default {
     gotoBack(){
       this.$router.replace('/addressMonitor');
     },
-    handleSearch(selectedKeys, confirm, dataIndex) {
+    /*handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
       let id =sessionStorage.getItem('id');
       this.$ajax({
@@ -346,7 +346,7 @@ export default {
           userName:'',
           eventName:this.searchEvent,
           coinKind:'',
-          currentPage:this.currentPage,
+          currentPage:1,
           pageSize:this.pageSize,
         }
       }).then(res=>{
@@ -358,8 +358,60 @@ export default {
           }
         }
       })
+    },*/
+    async handleSearch(selectedKeys, confirm, dataIndex){
+      confirm();
+      let id =sessionStorage.getItem('id2');
+      const coinmain =await  this.$ajax.get('monitor/admin/coinmain')
+      const {code,data} =coinmain.data
+      if(code ==1001){
+        const coins = data.map(item => {
+          return item
+        }).join(',')
+        const  coin = await this.$ajax.get('/monitor/admin/coincontract',{
+          params:{
+            coins,
+          }
+        })
+        const {data: coinData,code : coinCode}=coin.data
+        if(coinCode == 1001){
+          const coinKind = coinData.map(item => {
+            return item
+          }).join(',')
+          const dataList = await this.$ajax.get('/monitor/admin/notice-logs/addr',{
+            params:{
+              ruleId:id,
+              userName:'',
+              eventName:this.searchEvent,
+              coinKind,
+              currentPage:1,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data: noticeData,code : noticeCode}=dataList.data
+          if(noticeCode == '1001'){
+            this.dataList = noticeData.data.map(item => {
+              if (item.eventName != null) {
+                item.monitorType = '地址异动监控'
+              } else {
+                item.monitorType = '大额交易监控'
+              }
+              return item
+            })
+            Object.keys(this.dataList).forEach(key=>{
+              console.log(this.dataList[key].coinKind)
+              if(this.dataList[key].coinKind.startsWith('0x')){
+                this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+              }
+            })
+            this.total = noticeData.total
+          }
+        }
+
+      }
     },
-    handleReset(clearFilters) {
+
+    /*handleReset(clearFilters) {
       clearFilters();
       this.searchEvent = '';
       let id =sessionStorage.getItem('id');
@@ -371,7 +423,7 @@ export default {
           userName:'',
           eventName:this.searchEvent,
           coinKind:'',
-          currentPage:this.currentPage,
+          currentPage:1,
           pageSize:this.pageSize,
         }
       }).then(res=>{
@@ -383,6 +435,59 @@ export default {
           }
         }
       })
+    },*/
+    async handleReset(clearFilters){
+      clearFilters()
+      this.searchEvent='';
+      let id =sessionStorage.getItem('id2');
+      const coinmain =await  this.$ajax.get('monitor/admin/coinmain')
+      const {code,data} =coinmain.data
+      if(code ==1001){
+        const coins = data.map(item => {
+          return item
+        }).join(',')
+        const  coin = await this.$ajax.get('/monitor/admin/coincontract',{
+          params:{
+            coins,
+          }
+        })
+        const {data: coinData,code : coinCode}=coin.data
+        if(coinCode == 1001){
+          const coinKind = coinData.map(item => {
+            return item
+          }).join(',')
+          const dataList = await this.$ajax.get('/monitor/admin/notice-logs/addr',{
+            params:{
+              ruleId:id,
+              userName:'',
+              eventName:this.searchEvent,
+              coinKind,
+              currentPage:1,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data: noticeData,code : noticeCode}=dataList.data
+          if(noticeCode == '1001'){
+            this.dataList = noticeData.data.map(item => {
+              if (item.eventName != null) {
+                item.monitorType = '地址异动监控'
+              } else {
+                item.monitorType = '大额交易监控'
+              }
+              return item
+            })
+            Object.keys(this.dataList).forEach(key=>{
+              console.log(this.dataList[key].coinKind)
+              if(this.dataList[key].coinKind.startsWith('0x')){
+                this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+              }
+            })
+            this.total = noticeData.total
+          }
+        }
+
+      }
+
     },
     onChange(page,pageSize){
       this.currentPage=page;

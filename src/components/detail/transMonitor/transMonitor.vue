@@ -848,7 +848,7 @@ export default {
         this.form.setFieldsValue(this.uploadData)
       })
     },
-    handleSearch(selectedKeys, confirm, dataIndex) {
+   /* handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
       this.$ajax({
         method:"get",
@@ -857,7 +857,7 @@ export default {
           coin:'',
           userName:this.searchName1,
           userId:'',
-          currentPage:this.currentPage,
+          currentPage:1,
           pageSize:this.pageSize,
         }
       }).then(res=>{
@@ -867,8 +867,66 @@ export default {
         }
       })
 
+    },*/
+    handleSearch(selectedKeys, confirm, dataIndex){
+      confirm();
+      let coinArr=[];
+      let coinArr2=[];
+      let str;
+      let str2;
+      let strAll='';
+      let strAll2='';
+      this.$ajax({
+        method:"get",
+        url:'monitor/admin/coinmain',
+      }).then(res=>{
+        if(res.data.code==1001){
+          coinArr= res.data.data;
+          Object.keys(coinArr).forEach(key=>{
+            str = coinArr[key]+','
+            strAll = strAll+ str
+          })
+          this.$ajax({
+            method:"get",
+            url:'/monitor/admin/coincontract',
+            params:{
+              coins:strAll,
+            }
+          }).then(res=>{
+            if(res.data.code == 1001){
+              coinArr2= res.data.data
+              Object.keys(coinArr2).forEach(key=>{
+                str2 = coinArr2[key]+','
+                strAll2 = strAll2+ str2
+              })
+              this.$ajax({
+                method:"get",
+                url:'/monitor/admin/trans-rules',
+                params:{
+                  coin:strAll2,
+                  userName:this.searchName1,
+                  userId:'',
+                  currentPage:1,
+                  pageSize:this.pageSize,
+                }
+              }).then(res=>{
+                if(res.data.code == '1001'){
+                  this.dataList = res.data.data.data
+                  Object.keys(this.dataList).forEach(key=>{
+                    console.log(this.dataList[key].coinKind)
+                    if(this.dataList[key].coinKind.startsWith('0x')){
+                      this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+                    }
+                  })
+                  this.total=res.data.data.total
+                }
+              })
+            }
+          })
+        }
+      })
     },
-    handleReset(clearFilters) {
+    /*handleReset(clearFilters) {
       clearFilters();
       this.searchName1='';
       this.$ajax({
@@ -878,13 +936,72 @@ export default {
           coin:'',
           userName:this.searchName1,
           userId:'',
-          currentPage:this.currentPage,
+          currentPage:1,
           pageSize:this.pageSize,
         }
       }).then(res=>{
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
+        }
+      })
+    },*/
+    handleReset(clearFilters){
+      clearFilters();
+      this.searchName1='';
+      let coinArr=[];
+      let coinArr2=[];
+      let str;
+      let str2;
+      let strAll='';
+      let strAll2='';
+      this.$ajax({
+        method:"get",
+        url:'monitor/admin/coinmain',
+      }).then(res=>{
+        if(res.data.code==1001){
+          coinArr= res.data.data;
+          Object.keys(coinArr).forEach(key=>{
+            str = coinArr[key]+','
+            strAll = strAll+ str
+          })
+          this.$ajax({
+            method:"get",
+            url:'/monitor/admin/coincontract',
+            params:{
+              coins:strAll,
+            }
+          }).then(res=>{
+            if(res.data.code == 1001){
+              coinArr2= res.data.data
+              Object.keys(coinArr2).forEach(key=>{
+                str2 = coinArr2[key]+','
+                strAll2 = strAll2+ str2
+              })
+              this.$ajax({
+                method:"get",
+                url:'/monitor/admin/trans-rules',
+                params:{
+                  coin:strAll2,
+                  userName:this.searchName1,
+                  userId:'',
+                  currentPage:1,
+                  pageSize:this.pageSize,
+                }
+              }).then(res=>{
+                if(res.data.code == '1001'){
+                  this.dataList = res.data.data.data
+                  Object.keys(this.dataList).forEach(key=>{
+                    console.log(this.dataList[key].coinKind)
+                    if(this.dataList[key].coinKind.startsWith('0x')){
+                      this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+                    }
+                  })
+                  this.total=res.data.data.total
+                }
+              })
+            }
+          })
         }
       })
     },

@@ -864,7 +864,7 @@ export default {
           this.eventName=eventName
           this.noticeWay=noticeWay;
           this.coinKind=coinKind;
-          this.address=address;
+          this.address=address.trim();
           this.addressMark=addressMark;
           this.monitorMinVal=monitorMinVal;
         }
@@ -935,7 +935,7 @@ export default {
           this.eventName=eventName
           this.noticeWay=noticeWay;
           this.coinKind=coinKind;
-          this.address=address;
+          this.address=address.trim();
           this.addressMark=addressMark;
           this.monitorMinVal=monitorMinVal;
         }
@@ -1251,7 +1251,7 @@ export default {
             event:'',
             userName:this.searchName1,
             userId:'',
-            currentPage:this.currentPage,
+            currentPage:1,
             pageSize:this.pageSize,
           }
         }).then(res=>{
@@ -1269,7 +1269,7 @@ export default {
             event:this.searchEvent1,
             userName:'',
             userId:'',
-            currentPage:this.currentPage,
+            currentPage:1,
             pageSize:this.pageSize,
           }
         }).then(res=>{
@@ -1293,7 +1293,7 @@ export default {
           event:'',
           userName:'',
           userId:'',
-          currentPage:this.currentPage,
+          currentPage:1,
           pageSize:this.pageSize,
         }
       }).then(res=>{

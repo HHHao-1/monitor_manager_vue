@@ -478,7 +478,7 @@ export default {
         url:'/monitor/admin/users',
         params:{
           name:this.searchName,
-          currentPage:this.currentPage,
+          currentPage:1,
           pageSize:this.pageSize,
         }
       }).then(res=>{
@@ -500,7 +500,7 @@ export default {
         url:'/monitor/admin/users',
         params:{
           name:'',
-          currentPage:this.currentPage,
+          currentPage:1,
           pageSize:this.pageSize,
         }
       }).then(res=>{
