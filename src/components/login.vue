@@ -78,10 +78,12 @@ export default {
                 // 表示接口调用成功
                 let loginData = res.data.data.users[0].permission;
                 if (loginData.apply === 0) {
-                  that.$router.push('/userMonitor')
                   // 1表示登陆成功
                   sessionStorage.setItem("login","1")
                   sessionStorage.setItem("name",res.data.data.users[0].name)
+                  that.$nextTick(_ => {
+                    that.$router.push('/userMonitor')
+                  })
                 } else if (loginData.apply == 1) {
                   that.tmshow = 2
                   axios({
