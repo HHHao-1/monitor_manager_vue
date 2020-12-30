@@ -5,7 +5,7 @@
       <h2>提醒日志</h2>
       <a-button type="default" @click="gotoBack">返回</a-button>
     </div>
-    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
+    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" @change="handleChange">
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -306,6 +306,10 @@ export default {
         }
 
       }
+    },
+
+    async handleChange(pagination, filters, sorter, { currentDataSource }){
+
     },
     searchEventAjax(){
       this.isEvent=true

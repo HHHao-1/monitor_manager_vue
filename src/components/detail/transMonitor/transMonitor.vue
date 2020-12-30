@@ -4,7 +4,7 @@
       <h2>大额交易监控规则管理</h2>
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
-    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
+    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" @change="handleChange">
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -203,6 +203,7 @@
         showQuickJumper showSizeChanger
         :defaultCurrent="1"
         :total=total
+        :current="currentPage"
         :pageSize="pageSize"
         @change="onChange"
         @showSizeChange="onShowSizeChange"
@@ -345,7 +346,7 @@ export default {
         //  width:'200px',
           // filters: (() => {return this.aaa})(),
           filters:[],
-          onFilter: (value, record) => record.coinKind.indexOf(value) === 0,
+         // onFilter: (value, record) => record.coinKind.indexOf(value) === 0,
         },
         {
           title: '阈值',
@@ -413,31 +414,52 @@ export default {
       })
       return this.unique(list)
     },
-    handleChange(pagination, filters, sorter, { currentDataSource }){
-      let coinArr =[];
-      let filtersObj = {};
-      console.log(filters);
-      filtersObj={...filters};
-      for(let i=0;i<filtersObj.coinKind.length;i++){
-        console.log(filtersObj.coinKind[i])
-        coinArr.push(filtersObj.coinKind[i])
+    async handleChange(pagination, filters, sorter, { currentDataSource }){
+      const { coinKind } = filters
+      if(coinKind.length ==0 ){
+        this.getDataList()
+      }else {
+        const coins = coinKind.map(item => {
+          return item
+        }).join(',')
+        console.log(coins)
+        const coin = await this.$ajax.get('/monitor/admin/coincontract', {
+          params: {
+            coins: coins,
+          }
+        })
+        const {code, data} = coin.data
+        if (code == 1001) {
+          const coinKindList = data.map(item => {
+            return item
+          }).join(',')
+          this.currentPage = 1
+          const dataList = await this.$ajax.get('/monitor/admin/trans-rules', {
+            params: {
+              coin: coinKindList,
+              userName: '',
+              userId: '',
+              currentPage: this.currentPage,
+              pageSize: this.pageSize,
+            }
+          })
+          const {data: transData, code: transCode} = dataList.data
+          if (transCode == 1001) {
+            this.dataList = transData.data
+            Object.keys(this.dataList).forEach(key => {
+              console.log(this.dataList[key].coinKind)
+              if (this.dataList[key].coinKind.startsWith('0x')) {
+
+                this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2, this.dataList[key].coinKind.length)
+              }
+            })
+            this.total = transData.total
+          }
+        }
+
       }
-      this.$ajax({
-        method:"get",
-        url:'/monitor/admin/trans-rules',
-        params:{
-          coin:coinArr,
-          userName:'',
-          userId:'',
-          currentPage:this.currentPage,
-          pageSize:this.pageSize,
-        }
-      }).then(res=>{
-        if(res.data.code == '1001'){
-          this.dataList = res.data.data.data
-          this.total=res.data.data.total
-        }
-      })
+
+
     },
     searchNameAjax(){
       this.isMonitorName=true

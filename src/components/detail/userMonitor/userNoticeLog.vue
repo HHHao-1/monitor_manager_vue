@@ -5,7 +5,7 @@
       <h2>提醒日志</h2>
       <a-button type="default" @click="gotoBack" >返回</a-button>
     </div>
-    <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
+    <a-table :data-source="dataList" :columns="columns" :pagination="pagination"  @change="pageHandleChange">
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -237,7 +237,172 @@ export default {
           }
       })
 },
-    async pageHandleChange(pagination, filters, sorter, { currentDataSource }) {
+
+    async pageHandleChange(pagination, filters, sorter, { currentDataSource }){
+      let name = sessionStorage.getItem('name1');
+      const { monitorType } = filters
+      if (monitorType.length == 1) {
+        const [ first ] = monitorType
+        if (first === '大额交易监控') {
+          const coinmain = await this.$ajax.get('monitor/admin/coinmain')
+          const {code, data} = coinmain.data
+          if (code == 1001) {
+            const coins = data.map(item => {
+              return item
+            }).join(',')
+            const coin = await this.$ajax.get('/monitor/admin/coincontract', {
+              params: {
+                coins,
+              }
+            })
+            const {data: coinData, code: coinCode} = coin.data
+            if (coinCode == 1001) {
+              const coinKind = coinData.map(item => {
+                return item
+              }).join(',')
+              const dataList = await this.$ajax.get('/monitor/admin/notice-logs', {
+                params: {
+                  userName: name,
+                  monitorType: 'trans',
+                  eventName: '',
+                  coinKind,
+                  currentPage:1,
+                  pageSize: this.pageSize,
+                }
+              })
+              const {data: noticeData, code: noticeCode} = dataList.data
+              if (noticeCode == '1001') {
+                this.dataList = noticeData.data.map(item => {
+                  if (item.eventName != null) {
+                    item.monitorType = '地址异动监控'
+                  } else {
+                    item.monitorType = '大额交易监控'
+                  }
+                  return item
+                })
+                Object.keys(this.dataList).forEach(key => {
+                  console.log(this.dataList[key].coinKind)
+                  if (this.dataList[key].coinKind.startsWith('0x')) {
+                    this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2, this.dataList[key].coinKind.length)
+                  }
+                })
+                this.total = noticeData.total
+                //debugger
+              }
+            }
+          }
+        }
+        else{
+          let name = sessionStorage.getItem('name1');
+          const { monitorType } = filters
+          if (monitorType.length == 1) {
+            const [first] = monitorType
+            if (first === '地址异动监控') {
+              const coinmain = await this.$ajax.get('monitor/admin/coinmain')
+              const {code, data} = coinmain.data
+              if (code == 1001) {
+                const coins = data.map(item => {
+                  return item
+                }).join(',')
+                const coin = await this.$ajax.get('/monitor/admin/coincontract', {
+                  params: {
+                    coins,
+                  }
+                })
+                const {data: coinData, code: coinCode} = coin.data
+                if (coinCode == 1001) {
+                  const coinKind = coinData.map(item => {
+                    return item
+                  }).join(',')
+                  const dataList = await this.$ajax.get('/monitor/admin/notice-logs', {
+                    params: {
+                      userName: name,
+                      monitorType: 'addr',
+                      eventName: '',
+                      coinKind,
+                      currentPage: 1,
+                      pageSize: this.pageSize,
+                    }
+                  })
+                  const {data: noticeData, code: noticeCode} = dataList.data
+                  if (noticeCode == '1001') {
+                    this.dataList = noticeData.data.map(item => {
+                      if (item.eventName != null) {
+                        item.monitorType = '地址异动监控'
+                      } else {
+                        item.monitorType = '大额交易监控'
+                      }
+                      return item
+                    })
+                    Object.keys(this.dataList).forEach(key => {
+                      console.log(this.dataList[key].coinKind)
+                      if (this.dataList[key].coinKind.startsWith('0x')) {
+                        this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2, this.dataList[key].coinKind.length)
+                      }
+                    })
+                    this.total = noticeData.data.length
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      else {
+        let name = sessionStorage.getItem('name1');
+        const coinmain =await  this.$ajax.get('monitor/admin/coinmain')
+        const {code,data} =coinmain.data
+        if(code ==1001){
+          const coins = data.map(item => {
+            return item
+          }).join(',')
+          const  coin = await this.$ajax.get('/monitor/admin/coincontract',{
+            params:{
+              coins,
+            }
+          })
+          const {data: coinData,code : coinCode}=coin.data
+          if(coinCode == 1001){
+            const coinKind = coinData.map(item => {
+              return item
+            }).join(',')
+            const dataList = await this.$ajax.get('/monitor/admin/notice-logs',{
+              params:{
+                userName:name,
+                monitorType:'',
+                eventName:'',
+                coinKind,
+                currentPage:this.currentPage,
+                pageSize:this.pageSize,
+              }
+            })
+            const {data: noticeData,code : noticeCode}=dataList.data
+            if(noticeCode == '1001'){
+              this.dataList = noticeData.data.map(item => {
+                if (item.eventName != null) {
+                  item.monitorType = '地址异动监控'
+                } else {
+                  item.monitorType = '大额交易监控'
+                }
+                return item
+              })
+              Object.keys(this.dataList).forEach(key=>{
+                console.log(this.dataList[key].coinKind)
+                if(this.dataList[key].coinKind.startsWith('0x')){
+                  this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+                }
+              })
+              this.total = noticeData.data.length
+            }
+          }
+
+        }
+
+      }
+    },
+
+    /*async pageHandleChange(pagination, filters, sorter, { currentDataSource }) {
+      //pagination.current=1
       const { monitorType } = filters
       if (monitorType.length == 1) {
         const [ first ] = monitorType
@@ -258,7 +423,7 @@ export default {
                 monitorType:'trans',
                 eventName:'',
                 coinKind,
-                currentPage:this.currentPage,
+                currentPage:1,
                 pageSize:this.pageSize,
               }
             })
@@ -273,6 +438,8 @@ export default {
                 return item
               })
               this.total = noticeData.total
+              debugger
+              //pagination.total=this.total
             }
           }
         }
@@ -282,160 +449,8 @@ export default {
       } else {
 
       }
-    },
-    handleChange(pagination, filters, sorter, { currentDataSource }){
-      //console.log(pagination)
-      //let filtersObj = [] ;
-      debugger
-      this.filtersObj={...filters}
-      let trans,addr;
-      if(this.filtersObj.monitorType.length==1){
-        if(this.filtersObj.monitorType[0] == '大额交易监控'){
-          let name = sessionStorage.getItem('name1');
-          let coinArr=[];
-          let str;
-          let strAll='';
-          this.$ajax({
-            method:"get",
-            url:'monitor/admin/coinmain',
-          }).then(res=>{
-            if(res.data.code==1001){
-              coinArr= res.data.data;
-              Object.keys(coinArr).forEach(key=>{
-                if(coinArr[key][0] == '0' &&  coinArr[key][1] =='x'){
-                  coinArr[key]= coinArr[key].slice(2)
-                }
-                str = coinArr[key]+','
-                strAll = strAll+ str
-              })
-                this.$ajax({
-                  method:"get",
-                  url:'/monitor/admin/notice-logs',
-                  params:{
-                    userName:name,
-                    monitorType:'',
-                    eventName:'',
-                    coinKind:strAll,
-                    currentPage:this.currentPage,
-                    pageSize:this.pageSize,
-                  }
-                }).then(res=>{
-                  if(res.data.code == '1001'){
-                    this.dataList = res.data.data.data
-                    this.total = res.data.data.total
-                    for(let i = 0 ;i< this.dataList.length;i++) {
-                      if (this.dataList[i].eventName != null) {
-                        this.dataList[i].monitorType = '地址异动监控'
-                      } else {
-                        this.dataList[i].monitorType = '大额交易监控'
-                      }
-                    }
-                  }
-                })
+    },*/
 
-            }
-          })
-        }
-        else {
-          let name = sessionStorage.getItem('name1');
-          let coinArr=[];
-          let str;
-          let strAll='';
-          this.$ajax({
-            method:"get",
-            url:'monitor/admin/coinmain',
-          }).then(res=>{
-            if(res.data.code==1001){
-              coinArr= res.data.data;
-              Object.keys(coinArr).forEach(key=>{
-                if(coinArr[key][0] == '0' &&  coinArr[key][1] =='x'){
-                  coinArr[key]= coinArr[key].slice(2)
-                }
-                str = coinArr[key]+','
-                strAll = strAll+ str
-              })
-                console.log(strAll)
-                this.$ajax({
-                  method:"get",
-                  url:'/monitor/admin/notice-logs',
-                  params:{
-                    userName:name,
-                    monitorType:'',
-                    eventName:'',
-                    coinKind:strAll,
-                    currentPage:this.currentPage,
-                    pageSize:this.pageSize,
-                  }
-                }).then(res=>{
-                  if(res.data.code == '1001'){
-                    this.dataList = res.data.data.data
-                    this.total = res.data.data.total
-                    for(let i = 0 ;i< this.dataList.length;i++) {
-                      if (this.dataList[i].eventName != null) {
-                        this.dataList[i].monitorType = '地址异动监控'
-                      } else {
-                        this.dataList[i].monitorType = '大额交易监控'
-                      }
-                    }
-                  }
-                })
-
-            }
-          })
-
-        }
-      }
-      else{
-        let name = sessionStorage.getItem('name1');
-        let coinArr=[];
-        let str;
-        let strAll='';
-        this.$ajax({
-          method:"get",
-          url:'monitor/admin/coinmain',
-        }).then(res=>{
-          if(res.data.code==1001){
-            coinArr= res.data.data;
-            Object.keys(coinArr).forEach(key=>{
-              if(coinArr[key][0] == '0' &&  coinArr[key][1] =='x'){
-                coinArr[key]= coinArr[key].slice(2)
-              }
-              str = coinArr[key]+','
-              strAll = strAll+ str
-            })
-              console.log(strAll)
-              this.$ajax({
-                method:"get",
-                url:'/monitor/admin/notice-logs',
-                params:{
-                  userName:name,
-                  monitorType:'',
-                  eventName:'',
-                  coinKind:strAll,
-                  currentPage:this.currentPage,
-                  pageSize:this.pageSize,
-                }
-              }).then(res=>{
-                if(res.data.code == '1001'){
-                  this.dataList = res.data.data.data
-                  this.total = res.data.data.total
-                  for(let i = 0 ;i< this.dataList.length;i++) {
-                    if (this.dataList[i].eventName != null) {
-                      this.dataList[i].monitorType = '地址异动监控'
-                    } else {
-                      this.dataList[i].monitorType = '大额交易监控'
-                    }
-                  }
-                }
-              })
-          }
-        })
-      }
-      /*for(let i=0;i<filtersObj.monitorType.length;i++){
-        console.log(filtersObj.monitorType[i])
-      }*/
-      this.isSearchMonitorType=true
-    },
     searchEventAjax(){
       this.isEvent=true
       this.$ajax({
@@ -579,13 +594,12 @@ export default {
                 this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
               }
             })
-            this.total = noticeData.total
+            this.total = noticeData.data.length
           }
         }
 
       }
     },
-
     gotoBack(){
       this.$router.replace('/userMonitor');
     },

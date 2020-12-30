@@ -4,7 +4,7 @@
       <h2>监控币种管理</h2>
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
-    <a-table :columns="columns" :data-source="dataList" :pagination="pagination">
+    <a-table :columns="columns" :data-source="dataList" :pagination="pagination" @change="handleChange">
       <span slot="action" slot-scope="text, record">
         <a  @click="edit(text.id,text.mainChain,text.coinName,text.contractAddr,text.point)">编辑</a>
         <a @click="deleteChain(text.mainChain,text.coinName,text.contractAddr,text.point)">删除</a>
@@ -91,6 +91,7 @@
         showQuickJumper showSizeChanger
         :defaultCurrent="1"
         :total=total
+        :current="currentPage"
         :pageSize="pageSize"
         @change="onChange"
         @showSizeChange="onShowSizeChange"
@@ -148,7 +149,7 @@ export default {
           key: 'mainChain',
         //  width:'300px',
           filters:[],
-          onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
+        //  onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
         },
         {
           title: '币种名称',
@@ -156,7 +157,7 @@ export default {
           key: 'coinName',
         //  width:'300px',
           filters: [],
-          onFilter: (value, record) => record.coinName.indexOf(value) === 0,
+        //  onFilter: (value, record) => record.coinName.indexOf(value) === 0,
         },
         {
           title: '合约地址',
@@ -205,7 +206,7 @@ export default {
       this.pageSize = pageSize;
       this.getDataList();
     },
-    getDataList(){
+    /*getDataList(){
       this.$ajax({
         method:"get",
         url:'/monitor/admin/coin-kinds',
@@ -222,6 +223,98 @@ export default {
           this.total=res.data.data.total
         }
       })
+    },*/
+    async getDataList(){
+      let mainChain,coinKind
+      const  coinMain = await this.$ajax.get('monitor/admin/coinmain')
+      const {code,data} = coinMain.data
+      if(code ==1001 ){
+        const data1 = this.unique(data)
+        mainChain =data1.map(item=>{
+          return item ;
+        }).join(',')
+      }
+      const  coinList  =  await this.$ajax.get('monitor/admin/coinlist')
+      const {data :coinData,code:coinCode}=coinList.data
+      if(coinCode == 1001 ){
+        const data1 = this.unique(data)
+        coinKind = coinData.map(item =>{
+          return item
+        }).join(',')
+      }
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/coin-kinds',
+        params:{
+          mainChain: mainChain,
+          coinKind:coinKind,
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+      })
+    },
+    async handleChange(pagination, filters, sorter, { currentDataSource }){
+      const {mainChain,coinKind} = filters
+      if(mainChain.length !=0) {
+        const chain = mainChain.map(item => {
+          return item
+        }).join(',')
+        const coinList = await this.$ajax.get('monitor/admin/coinlist')
+        const {data: coinData, code: coinCode} = coinList.data
+        if (coinCode == 1001) {
+          const data1 = this.unique(coinData)
+          const coin = data1.map(item => {
+            return item
+          }).join(',')
+          this.currentPage = 1
+          const datalist  = await this.$ajax.get('/monitor/admin/coin-kinds',{
+            params:{
+              mainChain: chain,
+              coinKind: coin,
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data : dataL ,code :codeL} = datalist.data
+          if(codeL == 1001){
+            this.dataList = dataL.data
+            this.total = dataL.total
+          }
+        }
+      }
+      if(coinKind.length !=0 ){
+        const coin = coinKind.map(item =>{
+          return item
+        }).join(',')
+        const mainList = await this.$ajax.get('monitor/admin/coinmain')
+        const {data :mainData ,code :mainCode } = mainList.data
+        if(mainCode ==1001){
+          const data1  = this.unique(mainData)
+          const main =data1.map(item =>{
+            return item
+          }).join(',')
+          this.currentPage =1
+          const datalist  = await this.$ajax.get('/monitor/admin/coin-kinds',{
+            params:{
+              mainChain: main,
+              coinKind: coin,
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data : dataL ,code :codeL} = datalist.data
+          if(codeL == 1001){
+            this.dataList = dataL.data
+            this.total = dataL.total
+          }
+        }
+      }
+
     },
 
     addDataList(){
