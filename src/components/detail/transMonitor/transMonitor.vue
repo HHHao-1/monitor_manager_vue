@@ -499,6 +499,7 @@ export default {
       this.pageSize = pageSize;
       this.getDataList();
     },
+    // 获取币种
     getDataList(){
         let coinArr=[];
         let coinArr2=[];
