@@ -114,7 +114,7 @@ export default {
       pagination:false,
       currentPage:1,
       pageSize:8,
-      total:500,
+      total:0,
       pageNt:['8','10','20','30'],
       searchText: '',
       searchInput: null,

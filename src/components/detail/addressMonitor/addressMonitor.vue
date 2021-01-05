@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="top">
-      <h2>地址监控规则管理</h2>
+      <h2>监控事件管理</h2>
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
     <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
@@ -198,7 +198,7 @@
     </a-table>
     <!--添加-->
     <a-modal
-      title="添加地址监控规则"
+      title="添加监控事件规则"
       v-model="visible"
       cancelText="取消"
       okText="确定"
@@ -379,7 +379,7 @@
 
     <!--编辑-->
     <a-modal
-      title="编辑地址监控规则"
+      title="编辑监控事件规则"
       v-model="editVisible"
       cancelText="取消"
       okText="确定"

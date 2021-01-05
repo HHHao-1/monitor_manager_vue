@@ -47,7 +47,7 @@
         </a-menu-item>
         <a-menu-item key="addressMonitor">
           <a-icon type="form" />
-          <span>地址监控规则管理</span>
+          <span>监控事件管理</span>
         </a-menu-item>
         <a-menu-item key="transMonitor">
           <a-icon type="table" />
