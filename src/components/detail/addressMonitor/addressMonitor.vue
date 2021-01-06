@@ -92,7 +92,7 @@
         <a @click.stop="editCurrentItem(item)">编辑</a>
         <a v-show="item.state == 0"  @click.stop="forbidCurrentItem(item)">启用</a>
         <a v-show="item.state == 1"  @click.stop="forbidCurrentItem(item)">停用</a>
-        <a @click.stop="gotoLog(item.id)">提醒日志</a>
+        <a @click.stop="gotoLog(item)">提醒日志</a>
       </span>
       <span slot="noticeWay" slot-scope="way">
         {{way | noticeWayFun}}
@@ -1190,8 +1190,8 @@ export default {
       });
     },
 
-    gotoLog(id){
-      sessionStorage.setItem('id2',id);
+    gotoLog(item){
+      sessionStorage.setItem('id2', JSON.stringify(item));
       //sessionStorage.setItem('name',name);
       this.$router.replace('/addressNoticeLog')
     },
