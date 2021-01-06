@@ -12,7 +12,7 @@
     methods: {
       // 请求获取所有的币种信息
       async fetchAllCoinType() {
-        const coinResult = await this.$ajax.get('monitor/admin/coins')
+        const coinResult = await this.$ajax.get('/monitor/admin/coins')
         const { code , data, msg } = coinResult.data
         if (code == 1001) {
           this.coinType = data
