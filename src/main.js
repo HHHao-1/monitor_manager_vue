@@ -13,7 +13,7 @@ window.jQuery = $;
 window.$ = $;
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-import { Button, Select ,Input,Form,FormItem,DatePicker,Upload} from 'element-ui';
+import { Button, Select ,Input,Form,FormItem,DatePicker,Upload, Loading} from 'element-ui';
 
 
 Vue.config.productionTip = false
@@ -46,7 +46,41 @@ router.beforeEach((to, from, next) => {
   }
 })
 
+// 配置Loading
+let requestCount = 0
+let loadingService = null
 
+function beginLoading () {
+  loadingService = Loading.service({
+    lock: true,
+    text: '数据加载中...',
+    spinner: 'el-icon-loading',
+    background: 'rgba(0, 0, 0, 0.1)'
+  })
+}
+
+function stopLoading () {
+  loadingService && loadingService.close()
+}
+
+axios.interceptors.request.use(function (config) {
+  if (!config.hideLoading) {
+    requestCount++
+    beginLoading()
+  }
+  return config
+}, function (error) {
+  throw error
+})
+
+axios.interceptors.response.use(function (response) {
+  if (--requestCount <= 0) {
+    stopLoading()
+  }
+  return response
+}, function (err) {
+  throw err
+})
 
 new Vue({
   el: '#app',
