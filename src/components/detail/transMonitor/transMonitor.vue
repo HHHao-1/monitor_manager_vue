@@ -5,26 +5,22 @@
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
     <a-table :data-source="dataList" :columns="columns" :pagination="pagination" @change="handleChange">
-      <div
-        slot="filterDropdown"
+      <div slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
-        style="padding: 8px"
-      >
+        style="padding: 8px">
         <a-input
           v-ant-ref="c => (searchInput = c)"
           :placeholder="`Search ${column.dataIndex}`"
           v-model="searchName1"
           style="width: 188px; margin-bottom: 8px; display: block;left:80px"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
-          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
-        />
+          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"/>
         <a-button
           type="primary"
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px;left:80px"
-          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
-        >
+          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)">
           Search
         </a-button>
         <a-button size="small" style="width: 90px;left:80px" @click="() => handleReset(clearFilters)">
@@ -55,9 +51,8 @@
         slot="filterIcon"
         slot-scope="filtered"
         type="search"
-        :style="{ color: filtered ? '#108ee9' : undefined }"
-      />
-      <template slot="customRender" slot-scope="text, record, index, column">
+        :style="{ color: filtered ? '#108ee9' : undefined }"/>
+      <template slot="customRender" slot-scope="text">
       <span v-if="searchText && searchedColumn === column.dataIndex">
         <template
           v-for="(fragment, i) in text
@@ -84,8 +79,8 @@
       <span slot="eventAddTime" slot-scope="time">
         {{time | timeFilter}}
       </span>
-      <span slot="action" slot-scope="text, record">
-        <a  @click="edit(text.id,text.name,text.coinKind,text.monitorMinVal,text.noticeWay)">编辑</a>
+      <span slot="action" slot-scope="text">
+        <a  @click="edit(text)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
         <a  @click="gotoLog(text.id)">提醒日志</a>
@@ -110,8 +105,8 @@
         <p class="tmp3">
           <a-form-item label="监控用户" v-bind="formItemLayout">
             <a-select  style="width: 300px"  v-model="uploadData.name"  placeholder="请选择"  v-decorator="['name',{rules: [{required: true,whitespace: true,message: '请选择监控用户',},],},]">
-              <a-select-option v-for="(item,i) in unique(userList)" :value="item" :key="i">
-                {{item}}
+              <a-select-option v-for="item in userList" :value="JSON.stringify(item)" :key="item.id">
+                {{item.name}}
               </a-select-option>
             </a-select>
           </a-form-item>
@@ -119,8 +114,8 @@
         <p class="tmp3">
           <a-form-item label="币种" v-bind="formItemLayout">
             <a-select style="width: 300px"  v-model="uploadData.coinKind"  placeholder="请选择"  v-decorator="['coinKind',{rules: [{required: true,whitespace: true,message: '请选择币种',},],},]">
-              <a-select-option v-for="(item,i) in getStrList(coinList)" :value="item" :key="i" >
-                {{item}}
+              <a-select-option v-for="item in coinList" :value="JSON.stringify(item)" :key="item.id" >
+                {{item.coinName}}
               </a-select-option>
             </a-select>
           </a-form-item>
@@ -164,8 +159,8 @@
         <p class="tmp3">
           <a-form-item label="监控用户" v-bind="formItemLayout">
             <a-select style="width: 300px" v-model="uploadData2.name"  placeholder="请选择" v-decorator="['name',{rules: [{required: true,whitespace: true,message: '请选择监控用户',},],},]">
-              <a-select-option v-for="(item,i) in unique(userList)" :value="item" :key="i">
-                {{item}}
+              <a-select-option v-for="item in userList" :value="JSON.stringify(item)" :key="item.id">
+                {{item.name}}
               </a-select-option>
             </a-select>
           </a-form-item>
@@ -173,8 +168,8 @@
         <p class="tmp3">
           <a-form-item label="币种" v-bind="formItemLayout">
             <a-select style="width: 300px" v-model="uploadData2.coinKind"  placeholder="请选择" v-decorator="['coinKind',{rules: [{required: true,whitespace: true,message: '请选择币种',},],},]">
-              <a-select-option v-for="(item,i) in getStrList(coinList1)" :value="item" :key="i" >
-                {{item}}
+              <a-select-option v-for="item in coinList" :value="JSON.stringify(item)" :key="item.id" >
+                {{item.coinName}}
               </a-select-option>
             </a-select>
           </a-form-item>
@@ -202,58 +197,23 @@
       <a-pagination
         showQuickJumper showSizeChanger
         :defaultCurrent="1"
-        :total=total
+        :total="total"
         :current="currentPage"
         :pageSize="pageSize"
         @change="onChange"
         @showSizeChange="onShowSizeChange"
         :pageSizeOptions="pageNt" />
     </div>
-
-
-
-
   </div>
 </template>
 
 <script>
 import { Message } from 'element-ui'
-const data = [
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:1,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:2,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:40,
-    noticeWay:3,
-    addTime:'2020-10-01',
-    state:0,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:60,
-    noticeWay:4,
-    addTime:'2020-10-01',
-    state:0,
-  },
-];
+import coinMixin from "../mixin/coinMixin";
 
 export default {
+  name: 'TransMonitor',
+  mixins: [coinMixin],
   data() {
     return {
       isMonitorName:false,
@@ -263,7 +223,7 @@ export default {
       pagination:false,
       currentPage:1,
       pageSize:8,
-      total:500,
+      total:0,
       pageNt:['8','10','20','30'],
       bbb:[],
       editVisible:false,
@@ -273,7 +233,6 @@ export default {
       coinList:[],
       coinList1:[],
       dataList1:[],
-      data,
       searchText: '',
       searchInput: null,
       searchedColumn: '',
@@ -390,15 +349,9 @@ export default {
           }
         },
       ],
+
+      coinKinds: ''
     };
-  },
-  computed: {
-    aaa() {
-      return [
-        { text: 'BTC', value: 'BTC' },
-        { text: 'ETC', value: 'ETC' }
-      ]
-    }
   },
   methods: {
     getStrList(array){
@@ -414,54 +367,29 @@ export default {
       })
       return this.unique(list)
     },
-    async handleChange(pagination, filters, sorter, { currentDataSource }){
-      const { coinKind } = filters
-      if(coinKind.length ==0 ){
-        this.getDataList()
-      }else {
-        const coins = coinKind.map(item => {
-          return item
-        }).join(',')
-        console.log(coins)
-        const coin = await this.$ajax.get('/monitor/admin/coincontract', {
-          params: {
-            coins: coins,
-          }
-        })
-        const {code, data} = coin.data
-        if (code == 1001) {
-          const coinKindList = data.map(item => {
-            return item
-          }).join(',')
-          this.currentPage = 1
-          const dataList = await this.$ajax.get('/monitor/admin/trans-rules', {
-            params: {
-              coin: coinKindList,
-              userName: '',
-              userId: '',
-              currentPage: this.currentPage,
-              pageSize: this.pageSize,
-            }
-          })
-          const {data: transData, code: transCode} = dataList.data
-          if (transCode == 1001) {
-            this.dataList = transData.data
-            Object.keys(this.dataList).forEach(key => {
-              console.log(this.dataList[key].coinKind)
-              if (this.dataList[key].coinKind.startsWith('0x')) {
+    async handleChange(pagination, filters) {
 
-                this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2, this.dataList[key].coinKind.length)
-              }
-            })
-            this.total = transData.total
-          }
+      // 根据用户名查询
+      if (filters.name != undefined) {
+        if (filters.name.length == 0) {
+          this.searchName1 = ''
+        } else {
+          this.searchName1 = filters.name[0]
         }
-
       }
 
+      // 根据币种检索
+      if (filters.coinKind != undefined) {
+        if (filters.coinKind.length == 0 || filters.coinKind.length == this.coinType.length) {
+          this.coinKinds = this.coinType.map(item => item.contractAddr).join(",")
+        } else {
+          this.coinKinds = filters.coinKind.join(',')
+        }
+      }
 
+      this.commonFetchData()
     },
-    searchNameAjax(){
+    /*searchNameAjax(){
       this.isMonitorName=true
       this.$ajax({
         method:"get",
@@ -480,20 +408,22 @@ export default {
         }
         else {
           this.dataList = null
+
         }
       })
-    },
+    },*/
     reset(){
       this.searchName1 = '';
       this.getDataList();
     },
     onChange(page,pageSize){
       this.currentPage=page;
-      if(this.isMonitorName){
-        this.searchNameAjax()
-      }else{
-        this.getDataList();
-      }
+      // if(this.isMonitorName){
+      //   this.searchNameAjax()
+      // }else{
+      //   this.getDataList();
+      // }
+      this.commonFetchData()
     },
     onShowSizeChange(current, pageSize) {
       this.pageSize = pageSize;
@@ -564,12 +494,13 @@ export default {
         url:'/monitor/admin/users/list',
       }).then(res=>{
         if(res.data.code == '1001'){
-          this.dataList1= res.data.data.data
-          Object.keys(this.dataList1).forEach(key=>{
-            let name = this.dataList1[key].name
-            this.userList.push(name)
-
-          })
+          // this.dataList1= res.data.data.data
+          // Object.keys(this.dataList1).forEach(key=>{
+          //   let name = this.dataList1[key].name
+          //   this.userList.push(name)
+          //
+          // })
+          this.userList = res.data.data.data
         }
       })
     },
@@ -629,23 +560,34 @@ export default {
           notice = 6
           break
       }
-      let list =[];
-      class obj{
-        userName
-        coinKind
-        noticeWay
-        monitorMinVal
-        constructor(userName,coinKind,noticeWay,monitorMinVal){
-          this.userName=userName;
-          this.coinKind='0x'+coinKind;
-          this.noticeWay=noticeWay;
-          this.monitorMinVal=monitorMinVal;
-        }
-      };
-      list.push(new obj(this.uploadData.name,
-        this.uploadData.coinKind,
-        notice,
-        this.uploadData.monitorMinVal))
+      // let list =[];
+      // class obj{
+      //   userName
+      //   coinKind
+      //   noticeWay
+      //   monitorMinVal
+      //   constructor(userName,coinKind,noticeWay,monitorMinVal){
+      //     this.userName=userName;
+      //     this.coinKind=coinKind;
+      //     this.noticeWay=noticeWay;
+      //     this.monitorMinVal=monitorMinVal;
+      //   }
+      // };
+
+      const coinInfo = JSON.parse(this.uploadData.coinKind)
+      const userInfo = JSON.parse(this.uploadData.name)
+      // list.push(new obj(this.uploadData.name,
+      //   coinInfo.contractAddr,
+      //   notice,
+      //   this.uploadData.monitorMinVal))
+
+      const list = {
+        userId: userInfo.id,
+        coinKind: coinInfo.contractAddr,
+        noticeWay: notice,
+        monitorMinVal: this.uploadData.monitorMinVal,
+        state: 1
+    }
 
       let that = this;
       that.$ajax({
@@ -654,13 +596,13 @@ export default {
         data:list,
       }).then(res=>{
         if(res.data.code=='1001'){
-          alert('添加成功')
-          this.getDataList()
+          Message.success('添加成功')
+          this.currentPage = 1
+          this.commonFetchData()
         }else{
-          alert('添加失败')
+          Message.error('添加失败')
         }
       })
-
     },
     // 修改
     updataList(){
@@ -687,7 +629,6 @@ export default {
           notice = 6
           break
       }
-      let list=[];
       class obj{
         uid
         id
@@ -696,35 +637,61 @@ export default {
         monitorMinVal
         constructor(uid,idTEST,coinKind,noticeWay,monitorMinVal){
           this.uid = uid
-          this.id=0;
-          this.coinKind='0x'+coinKind;
+          this.id=idTEST;
+          this.coinKind=coinKind;
           this.noticeWay=noticeWay;
           this.monitorMinVal=monitorMinVal;
         }
       };
-      list.push(new obj(this.uploadData2.id,this.uploadData2.name,
-        this.uploadData2.coinKind,
-        notice.toString(),
-        this.uploadData2.monitorMinVal))
+
+      const coinInfo = JSON.parse(this.uploadData2.coinKind)
+      const userInfo = JSON.parse(this.uploadData2.name)
+
+      // list.push(new obj(this.uploadData2.id,this.uploadData2.id,
+      //   coinInfo.contractAddr,
+      //   notice.toString(),
+      //   this.uploadData2.monitorMinVal))
+      const list = {
+        id: this.uploadData2.id,
+        coinKind: coinInfo.contractAddr,
+        monitorMinVal: this.uploadData2.monitorMinVal,
+        noticeWay: notice,
+        userId: userInfo.id
+    }
       this.$ajax({
         method:"put",
         url:'/monitor/admin/trans-rules',
         data:list,
       }).then(res=>{
         if(res.data.code=='1001'){
-          alert('修改成功')
-          this.getDataList();
+          Message.success('修改成功')
+          this.editVisible=false;
+          this.commonFetchData();
         }else{
-          alert('修改失败')
+          Message.error('修改失败')
         }
       })
     },
-    edit(id,name,coinKind,monitorMinVal,noticeWay){
-      this.searchCoin1()
-      this.searchUserName()
+    edit(item){
+      // this.searchCoin1()
+      const {id,name,coinKind,monitorMinVal,noticeWay, userId} = item
+
       this.uploadData2.id = id
-      this.uploadData2.name= name;
-      this.uploadData2.coinKind = coinKind;
+
+      const userInfo = this.userList.filter(item => item.id == userId)
+      if (userInfo.length > 0) {
+        this.uploadData2.name = JSON.stringify(userInfo[0])
+      } else {
+        this.uploadData2.name = name;
+      }
+
+      const coinInfo = this.coinType.filter(item => item.coinName == coinKind)
+      if (coinInfo.length > 0) {
+        this.uploadData2.coinKind = JSON.stringify(coinInfo[0]);
+      } else {
+        this.uploadData2.coinKind = coinKind;
+      }
+
       this.uploadData2.monitorMinVal = monitorMinVal;
       //this.uploadData2.noticeWay = noticeWay;
       switch(noticeWay){
@@ -773,12 +740,12 @@ export default {
       }).then(res=>{
         if(res.data.code == "1001"){
           //  that.$message.success(res.data.msg);
-          alert('成功重新启用此用户')
-          that.getDataList();
+          Message.success('成功重新启用此用户')
+          that.commonFetchData();
         }else {
           //  that.$message.error(res.data.msg)
-          alert('启用此用户失败')
-          that.getDataList();
+          Message.success('启用此用户失败')
+          that.commonFetchData();
 
         }
       })
@@ -794,12 +761,13 @@ export default {
         }
       }).then(res=>{
         if(res.data.code == "1001"){
-          alert('成功禁用此规则')
-          that.getDataList();
+          Message.success('成功禁用此规则')
+          // that.getDataList();
+          this.commonFetchData()
         }else {
-          alert('禁用此规则失败')
-          that.getDataList();
-
+          Message.error('禁用此规则失败')
+          // that.getDataList();
+          this.commonFetchData()
         }
       })
     },
@@ -808,7 +776,7 @@ export default {
       this.form.validateFields(err => {
         if (!err && this.uploadData.noticeWay!='') {
           this.addTransDataList();
-          this.getDataList();
+          // this.getDataList();
           this.visible=false;
         }
         else{
@@ -831,8 +799,8 @@ export default {
       this.editForm.validateFields(err => {
         if (!err && this.uploadData2.noticeWay!='') {
           this.updataList();
-          this.editVisible=false;
-          this.getDataList();
+          // this.editVisible=false;
+          // this.getDataList();
         }
         else{
           Message.error('请填写通知方式！')
@@ -860,7 +828,6 @@ export default {
       this.allowClear=true;
 
       this.searchUserName();
-      this.searchCoin1();
       this.uploadData = {
         name:null,
         coinKind:'',
@@ -893,61 +860,61 @@ export default {
     },*/
     handleSearch(selectedKeys, confirm, dataIndex){
       confirm();
-      let coinArr=[];
-      let coinArr2=[];
-      let str;
-      let str2;
-      let strAll='';
-      let strAll2='';
-      this.$ajax({
-        method:"get",
-        url:'monitor/admin/coinmain',
-      }).then(res=>{
-        if(res.data.code==1001){
-          coinArr= res.data.data;
-          Object.keys(coinArr).forEach(key=>{
-            str = coinArr[key]+','
-            strAll = strAll+ str
-          })
-          this.$ajax({
-            method:"get",
-            url:'/monitor/admin/coincontract',
-            params:{
-              coins:strAll,
-            }
-          }).then(res=>{
-            if(res.data.code == 1001){
-              coinArr2= res.data.data
-              Object.keys(coinArr2).forEach(key=>{
-                str2 = coinArr2[key]+','
-                strAll2 = strAll2+ str2
-              })
-              this.$ajax({
-                method:"get",
-                url:'/monitor/admin/trans-rules',
-                params:{
-                  coin:strAll2,
-                  userName:this.searchName1,
-                  userId:'',
-                  currentPage:1,
-                  pageSize:this.pageSize,
-                }
-              }).then(res=>{
-                if(res.data.code == '1001'){
-                  this.dataList = res.data.data.data
-                  Object.keys(this.dataList).forEach(key=>{
-                    console.log(this.dataList[key].coinKind)
-                    if(this.dataList[key].coinKind.startsWith('0x')){
-                      this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
-                    }
-                  })
-                  this.total=res.data.data.total
-                }
-              })
-            }
-          })
-        }
-      })
+      // let coinArr=[];
+      // let coinArr2=[];
+      // let str;
+      // let str2;
+      // let strAll='';
+      // let strAll2='';
+      // this.$ajax({
+      //   method:"get",
+      //   url:'monitor/admin/coinmain',
+      // }).then(res=>{
+      //   if(res.data.code==1001){
+      //     coinArr= res.data.data;
+      //     Object.keys(coinArr).forEach(key=>{
+      //       str = coinArr[key]+','
+      //       strAll = strAll+ str
+      //     })
+      //     this.$ajax({
+      //       method:"get",
+      //       url:'/monitor/admin/coincontract',
+      //       params:{
+      //         coins:strAll,
+      //       }
+      //     }).then(res=>{
+      //       if(res.data.code == 1001){
+      //         coinArr2= res.data.data
+      //         Object.keys(coinArr2).forEach(key=>{
+      //           str2 = coinArr2[key]+','
+      //           strAll2 = strAll2+ str2
+      //         })
+      //         this.$ajax({
+      //           method:"get",
+      //           url:'/monitor/admin/trans-rules',
+      //           params:{
+      //             coin:strAll2,
+      //             userName:this.searchName1,
+      //             userId:'',
+      //             currentPage:1,
+      //             pageSize:this.pageSize,
+      //           }
+      //         }).then(res=>{
+      //           if(res.data.code == '1001'){
+      //             this.dataList = res.data.data.data
+      //             Object.keys(this.dataList).forEach(key=>{
+      //               console.log(this.dataList[key].coinKind)
+      //               if(this.dataList[key].coinKind.startsWith('0x')){
+      //                 this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+      //               }
+      //             })
+      //             this.total=res.data.data.total
+      //           }
+      //         })
+      //       }
+      //     })
+      //   }
+      // })
     },
     /*handleReset(clearFilters) {
       clearFilters();
@@ -972,64 +939,106 @@ export default {
     handleReset(clearFilters){
       clearFilters();
       this.searchName1='';
-      let coinArr=[];
-      let coinArr2=[];
-      let str;
-      let str2;
-      let strAll='';
-      let strAll2='';
-      this.$ajax({
-        method:"get",
-        url:'monitor/admin/coinmain',
-      }).then(res=>{
-        if(res.data.code==1001){
-          coinArr= res.data.data;
-          Object.keys(coinArr).forEach(key=>{
-            str = coinArr[key]+','
-            strAll = strAll+ str
-          })
-          this.$ajax({
-            method:"get",
-            url:'/monitor/admin/coincontract',
-            params:{
-              coins:strAll,
+      // let coinArr=[];
+      // let coinArr2=[];
+      // let str;
+      // let str2;
+      // let strAll='';
+      // let strAll2='';
+      // this.$ajax({
+      //   method:"get",
+      //   url:'monitor/admin/coinmain',
+      // }).then(res=>{
+      //   if(res.data.code==1001){
+      //     coinArr= res.data.data;
+      //     Object.keys(coinArr).forEach(key=>{
+      //       str = coinArr[key]+','
+      //       strAll = strAll+ str
+      //     })
+      //     this.$ajax({
+      //       method:"get",
+      //       url:'/monitor/admin/coincontract',
+      //       params:{
+      //         coins:strAll,
+      //       }
+      //     }).then(res=>{
+      //       if(res.data.code == 1001){
+      //         coinArr2= res.data.data
+      //         Object.keys(coinArr2).forEach(key=>{
+      //           str2 = coinArr2[key]+','
+      //           strAll2 = strAll2+ str2
+      //         })
+      //         this.$ajax({
+      //           method:"get",
+      //           url:'/monitor/admin/trans-rules',
+      //           params:{
+      //             coin:strAll2,
+      //             userName:this.searchName1,
+      //             userId:'',
+      //             currentPage:1,
+      //             pageSize:this.pageSize,
+      //           }
+      //         }).then(res=>{
+      //           if(res.data.code == '1001'){
+      //             this.dataList = res.data.data.data
+      //             Object.keys(this.dataList).forEach(key=>{
+      //               console.log(this.dataList[key].coinKind)
+      //               if(this.dataList[key].coinKind.startsWith('0x')){
+      //                 this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
+      //               }
+      //             })
+      //             this.total=res.data.data.total
+      //           }
+      //         })
+      //       }
+      //     })
+      //   }
+      // })
+    },
+    // 获取用户数据
+    commonFetchData() {
+      const params = {
+        coin: this.coinKinds,
+        userName:this.searchName1,
+        userId:'',
+        currentPage:this.currentPage,
+        pageSize:this.pageSize,
+      }
+
+      this.$ajax.get('/monitor/admin/trans-rules', {
+        params
+      }).then(res => {
+        const {code, data} = res.data
+
+        if (code == 1001) {
+          this.dataList = data.data.map(item => {
+
+            const coinKindArr = this.coinType.filter(i => item.coinKind == i.contractAddr)
+            if (coinKindArr.length > 0) {
+              item.coinKind = coinKindArr[0].coinName
             }
-          }).then(res=>{
-            if(res.data.code == 1001){
-              coinArr2= res.data.data
-              Object.keys(coinArr2).forEach(key=>{
-                str2 = coinArr2[key]+','
-                strAll2 = strAll2+ str2
-              })
-              this.$ajax({
-                method:"get",
-                url:'/monitor/admin/trans-rules',
-                params:{
-                  coin:strAll2,
-                  userName:this.searchName1,
-                  userId:'',
-                  currentPage:1,
-                  pageSize:this.pageSize,
-                }
-              }).then(res=>{
-                if(res.data.code == '1001'){
-                  this.dataList = res.data.data.data
-                  Object.keys(this.dataList).forEach(key=>{
-                    console.log(this.dataList[key].coinKind)
-                    if(this.dataList[key].coinKind.startsWith('0x')){
-                      this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
-                    }
-                  })
-                  this.total=res.data.data.total
-                }
-              })
-            }
+
+            return item
           })
+          this.total = data.total
+        } else {
+          this.dataList = []
+          this.total = 0
         }
       })
     },
-
-
+    fetchAfterHasCoinType() {
+      this.columns[2].filters = this.coinType.map(item => {
+        return {
+          text: item.coinName,
+          value: item.contractAddr
+        }
+      })
+      this.coinKinds = this.coinType.map(item => item.contractAddr).join(',')
+      this.coinList = this.coinType
+      this.commonFetchData();
+      this.searchUserName()
+    }
   },
   filters:{
     stateFun(state){
@@ -1075,8 +1084,8 @@ export default {
 
   },
   mounted() {
-    this.getDataList();
-    this.searchCoin();
+    // this.getDataList();
+    // this.searchCoin(); that.columns[2].filters
   }
 };
 </script>
