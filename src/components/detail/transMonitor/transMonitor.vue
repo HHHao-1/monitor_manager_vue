@@ -83,7 +83,7 @@
         <a  @click="edit(text)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
-        <a  @click="gotoLog(text.id)">提醒日志</a>
+        <a  @click="gotoLog(text)">提醒日志</a>
         <!--{{text.id}}{{text.coinKind}}{{text.monitorMinVal}}{{text.name}}{{text.coinKind}}-->
       </span>
       <span slot="noticeWay" slot-scope="way">
@@ -820,7 +820,7 @@ export default {
         return 'default';
     },
     gotoLog(id){
-      sessionStorage.setItem('id',id);
+      sessionStorage.setItem('id', JSON.stringify(id));
       this.$router.replace('/transNoticeLog')
     },
     showModal(){

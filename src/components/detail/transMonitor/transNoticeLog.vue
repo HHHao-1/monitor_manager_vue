@@ -38,7 +38,7 @@
         type="search"
         :style="{ color: filtered ? '#108ee9' : undefined }"
       />
-      <template slot="customRender" slot-scope="text, record, index, column">
+      <template slot="customRender" slot-scope="text">
       <span v-if="searchText && searchedColumn === column.dataIndex">
         <template
           v-for="(fragment, i) in text
@@ -58,7 +58,7 @@
           {{ text }}
         </template>
       </template>
-      <span slot="noticeWay" slot-scope="way">
+      <span slot="notifyType" slot-scope="way">
         {{way | noticeWayFun}}
       </span>
       <span slot="noticeTime" slot-scope="time">
@@ -74,6 +74,7 @@
       <a-pagination
         showQuickJumper showSizeChanger
         :defaultCurrent="1"
+        :current="currentPage"
         :total=total
         :pageSize="pageSize"
         @change="onChange"
@@ -84,48 +85,17 @@
 </template>
 
 <script>
-const data = [
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:1,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:100,
-    noticeWay:2,
-    addTime:'2020-10-01',
-    state:1,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:40,
-    noticeWay:3,
-    addTime:'2020-10-01',
-    state:0,
-  },
-  {
-    name:'张三',
-    coinKind:'BTC',
-    monitorMinVal:60,
-    noticeWay:4,
-    addTime:'2020-10-01',
-    state:0,
-  },
-];
+  import { Message } from 'element-ui'
+  import coinMixin from "../mixin/coinMixin";
 
 export default {
+  name: 'TransNoticeLog',
+  mixins: [coinMixin],
   data() {
     return {
       pagination:false,
-      total:500,
+      total:0,
       pageNt:['8','10','20','30'],
-      data,
       searchText: '',
       searchInput: null,
       searchedColumn: '',
@@ -166,11 +136,11 @@ export default {
         },
         {
           title: '通知方式',
-          dataIndex: 'noticeWay',
-          key: 'noticeWay',
+          dataIndex: 'notifyType',
+          key: 'notifyType',
         //  width:'300px',
           scopedSlots: {
-            customRender: 'noticeWay',
+            customRender: 'notifyType',
           }
 
         },
@@ -181,9 +151,9 @@ export default {
           scopedSlots: {
             customRender: 'noticeTime',
           }
-        },
-
+        }
       ],
+      currentItem: {} // 上页传入数据
     };
   },
   methods: {
@@ -229,27 +199,31 @@ export default {
 
     },*/
     async getTransLogList(){
-      let id =sessionStorage.getItem('id');
-      const coinmain =await  this.$ajax.get('monitor/admin/coinmain')
-      const {code,data} =coinmain.data
-      if(code ==1001){
-        const coins = data.map(item => {
-          return item
-        }).join(',')
-        const  coin = await this.$ajax.get('/monitor/admin/coincontract',{
-          params:{
-            coins,
-          }
-        })
-        const {data: coinData,code : coinCode}=coin.data
-        if(coinCode == 1001){
-          const coinKind = coinData.map(item => {
-            return item
-          }).join(',')
+      // let id = sessionStorage.getItem('id');
+
+      // const coinmain =await  this.$ajax.get('monitor/admin/coinmain')
+      // const {code,data} =coinmain.data
+      // if(code ==1001){
+      //   const coins = data.map(item => {
+      //     return item
+      //   }).join(',')
+      //   const  coin = await this.$ajax.get('/monitor/admin/coincontract',{
+      //     params:{
+      //       coins,
+      //     }
+      //   })
+      //   const {data: coinData,code : coinCode}=coin.data
+      //   if(coinCode == 1001){
+      //     const coinKind = coinData.map(item => {
+      //       return item
+      //     }).join(',')
+
+      const coinKind = this.coinType.map(item => item.contractAddr).join(",")
+
           const dataList = await this.$ajax.get('/monitor/admin/notice-logs/trans',{
             params:{
-              ruleId:id,
-              userName:name,
+              ruleId: this.currentItem.id,
+              userName: name,
               coinKind,
               currentPage:this.currentPage,
               pageSize:this.pageSize,
@@ -257,25 +231,29 @@ export default {
           })
           const {data: noticeData,code : noticeCode}=dataList.data
           if(noticeCode == '1001'){
-            this.dataList = noticeData.data.map(item => {
+            this.dataList = noticeData.content.map(item => {
               if (item.eventName != null) {
                 item.monitorType = '地址异动监控'
               } else {
                 item.monitorType = '大额交易监控'
               }
+
+              const coinKindArr = this.coinType.filter(i => item.coinKind == i.contractAddr)
+              if (coinKindArr.length > 0) {
+                item.coinKind = coinKindArr[0].coinName
+              }
+
+              item.userName = this.currentItem.name
               return item
             })
-            Object.keys(this.dataList).forEach(key=>{
-              console.log(this.dataList[key].coinKind)
-              if(this.dataList[key].coinKind.startsWith('0x')){
-                this.dataList[key].coinKind = this.dataList[key].coinKind.substring(2,this.dataList[key].coinKind.length)
-              }
-            })
-            this.total = noticeData.total
+            this.total = noticeData.totalElements
+          } else {
+            this.total = 0
+            this.dataList = []
           }
-        }
-
-      }
+      //   }
+      //
+      // }
     },
     gotoBack(){
       this.$router.replace('/transMonitor');
@@ -349,7 +327,9 @@ export default {
         }
       })
     },
-
+    fetchAfterHasCoinType() {
+      this.getTransLogList();
+    }
   },
   filters:{
     timeFilter(time){
@@ -389,9 +369,9 @@ export default {
     },
   },
   mounted() {
-    this.getTransLogList();
-    this.searchCoinInfo();
-
+    // this.getTransLogList();
+    // this.searchCoinInfo();
+    this.currentItem = JSON.parse(sessionStorage.getItem('id'));
   }
 };
 </script>
