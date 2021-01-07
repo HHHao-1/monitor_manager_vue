@@ -601,7 +601,7 @@ export default {
       //       })
       //       this.total = noticeData.total
       //     }
-      //   }
+      //
       // }
     },
     searchCoinInfo(){
