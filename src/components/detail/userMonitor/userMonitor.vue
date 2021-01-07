@@ -89,7 +89,7 @@
         <a  @click="edit(text.name,text.phone,text.email,text.remark, text.id)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
-        <a  @click="gotoLog(text.name)">提醒日志</a>
+        <a  @click="gotoLog(text)">提醒日志</a>
       </span>
         <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
           添加时间：{{ record.createTime | timeFilter}}
@@ -568,8 +568,8 @@ export default {
     handleSubmit() {
       //
     },
-    gotoLog(name){
-      sessionStorage.setItem('name1',name);
+    gotoLog(item){
+      sessionStorage.setItem('name1', JSON.stringify(item));
       this.$router.replace('/userNoticeLog')
     },
     statePoint(state){
