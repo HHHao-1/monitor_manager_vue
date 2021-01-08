@@ -103,7 +103,6 @@
     </a-table>
     <div class="page">
       <a-pagination
-        showQuickJumper showSizeChanger
         :defaultCurrent="currentPage"
         :current="currentPage"
         :total=total
@@ -442,7 +441,7 @@ export default {
       searchVal:'',
       pagination:false,
       currentPage:1,
-      pageSize:8,
+      pageSize:10,
       total:0,
       pageNt:['8','10','20','30'],
       dataObj:{

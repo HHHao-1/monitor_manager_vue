@@ -61,14 +61,7 @@
           <a-icon type="check-circle" />
           <span>用户管理</span>
         </a-menu-item>
-
       </a-menu>
-
-
-
-
-
-
     </a-layout-sider>
     <a-layout>
       <a-layout-header :style="{ background: '#fff', padding: 0 ,textAlign:'right',paddingRight:'20px'}">   <!--这是顶部栏-->
@@ -77,8 +70,8 @@
     text-decoration: underline;cursor: pointer" @click="showDeleteConfirm">退出</span>
       </a-layout-header>
       <a-layout-content class="mid" :style="{ margin: '24px 16px 0' }">   <!--这是主要内容栏--><!--24是距离上方的margin  160是距离左右的margin，原来是16 我改成了160，这里改也不对-->
-        <div :style="{ padding: '24px', background: '#fff', height:'100%' }">
-          <router-view style="width: 100%"></router-view>
+        <div :style="{ padding: '24px', background: '#fff', 'min-height':'100%' }">
+          <router-view style="width: 100%;"></router-view>
         </div>
       </a-layout-content>
 

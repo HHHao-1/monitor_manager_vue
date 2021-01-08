@@ -88,7 +88,6 @@
 
     <div class="page">
       <a-pagination
-        showQuickJumper showSizeChanger
         :defaultCurrent="1"
         :total=total
         :current="currentPage"
@@ -109,8 +108,8 @@ export default {
       dataList1:[],
       pagination:false,
       currentPage:1,
-      pageSize:8,
-      total:500,
+      pageSize:10,
+      total:0,
       pageNt:['8','10','20','30'],
       dataList:[],
       mainChainList:[],

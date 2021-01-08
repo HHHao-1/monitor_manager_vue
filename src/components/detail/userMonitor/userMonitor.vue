@@ -171,13 +171,12 @@
 
     <div class="page">
       <a-pagination
-        showQuickJumper showSizeChanger
         :defaultCurrent="1"
+        :current="currentPage"
         :total=total
         :pageSize="pageSize"
         @change="onChange"
-        @showSizeChange="onShowSizeChange"
-        :pageSizeOptions="pageNt" />
+        @showSizeChange="onShowSizeChange"/>
     </div>
 
   </div>
@@ -202,7 +201,7 @@ export default {
       showValue:'',
       dataList:[],
       currentPage:1,
-      pageSize:8,
+      pageSize:10,
       total:0,
       pageNt:['8','10','20','30'],
       uploadData: {
@@ -638,6 +637,7 @@ export default {
 .page{
   text-align: right;
   margin-top: 30px;
+  margin-right: 30px;
 }
 .modalButton{
   margin-top:10px;

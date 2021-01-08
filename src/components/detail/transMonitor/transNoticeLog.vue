@@ -72,7 +72,6 @@
     </a-table>
     <div class="page">
       <a-pagination
-        showQuickJumper showSizeChanger
         :defaultCurrent="1"
         :current="currentPage"
         :total=total
@@ -102,7 +101,7 @@ export default {
       dataList:[],
       dataList1:[],
       currentPage:1,
-      pageSize:8,
+      pageSize:10,
       columns: [
         {
           title: '监控用户',
