@@ -56,8 +56,17 @@ export default {
       })()
     };
     window.onload = function () {
-      var url = encodeURIComponent('https://bifrost.chaindigg.com/api/login/auth_code')
-      var goto = encodeURIComponent('https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=dingoazcm5jegnjk78as0f&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=' + url)
+
+      let appid = 'dingoazcm5jegnjk78as0f'
+      let baseUrl = 'https://bifrost.chaindigg.com'
+
+      /* IFTRUE_internal */
+      appid = 'dingoaswifiq5fuxsiyak7'
+      baseUrl = 'http://bifrost.blockdigg.com'
+      /* FITRUE_internal */
+
+      var url = encodeURIComponent(`${baseUrl}/api/login/auth_code`)
+      var goto = encodeURIComponent(`https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=${appid}&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=${url}`)
 
       // console.log(goto);
       var obj = DDLogin({id: "login_container", goto: goto, style: "border:none;", width: "365", height: "400"});
@@ -68,7 +77,7 @@ export default {
           var loginTmpCode = event.data;
           axios({
             method: 'get',
-            url: "https://bifrost.chaindigg.com/connect/oauth2/sns_authorize?appid=dingoazcm5jegnjk78as0f&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=REDIRECT_URI&loginTmpCode=" + loginTmpCode,
+            url: `${baseUrl}/connect/oauth2/sns_authorize?appid=${appid}&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=REDIRECT_URI&loginTmpCode=${loginTmpCode}`,
           }).then(res => {
             if (res.data.code == 0) {
               axios({
