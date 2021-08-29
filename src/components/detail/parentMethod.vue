@@ -44,7 +44,6 @@ export default {
           pageSize:9999,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1'){
           this.dataList1= res.data.data
           Object.keys(this.dataList1).forEach(key=>{
@@ -72,10 +71,8 @@ export default {
         method:"get",
         url:'/monitor/admin/coinlist',
       }).then(res=>{
-        console.log(res)
+
         if(res.data.code == '1'){
-          console.log('132412352435')
-          console.log(res.data.data)
           that.dataList = res.data.data
           Object.keys(that.dataList).forEach(key=>{
             let filterList = {

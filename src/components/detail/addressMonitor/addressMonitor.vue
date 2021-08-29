@@ -1,62 +1,59 @@
 <template>
   <div>
     <div class="top">
-      <h2>地址监控规则管理</h2>
-      <a-button type="primary" @click="showModal">添加</a-button>
+      <h2>监控事件管理</h2>
+      <a-button type="primary" @click="addEventClickHandle">添加</a-button>
     </div>
     <a-table :data-source="dataList" :columns="columns" :pagination="pagination" >
       <div
-        slot="filterDropdown"
+        slot="userNameFilterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
-        style="padding: 8px"
+        style="padding: 8px;"
       >
-        <div >
-          <a-input
-            style="width: 188px; margin-bottom: 8px; display: block;left:80px"
-            placeholder="Search Name"
-            v-model="searchName1"
-            @pressEnter="searchNameAjax"
-            id="searchInput1"
-          />
-          <a-button
-            type="primary"
-            icon="search"
-            size="small"
-            style="width: 90px; margin-right: 8px;left:80px"
-            @click="searchNameAjax"
-          >
-            Search
-          </a-button>
-          <a-button size="small" style="width: 90px;left:80px" @click="reset">
-            Reset
-          </a-button>
-        </div>
-
-      </div>
-
-      <div
-        slot="filterDropdown1"
-        slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
-        style="padding: 8px"
-      >
-
         <a-input
+          v-ant-ref="c => (searchInput = c)"
+          :placeholder="`Search ${column.dataIndex}`"
+          v-model="searchName1"
           style="width: 188px; margin-bottom: 8px; display: block;"
-          placeholder="Search Event"
-          v-model="searchEvent1"
-          id="searchInput2"
-          @pressEnter="searchEventAjax"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
         <a-button
           type="primary"
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-          @click="searchEventAjax"
+          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
         >
           Search
         </a-button>
-        <a-button size="small" style="width: 90px" @click="reset1">
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters, column.dataIndex)">
+          Reset
+        </a-button>
+      </div>
+      <div
+        slot="eventNameFilterDropdown"
+        slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+        style="padding: 8px"
+      >
+        <a-input
+          v-ant-ref="c => (searchInput = c)"
+          :placeholder="`Search ${column.dataIndex}`"
+          v-model="searchEvent1"
+          style="width: 188px; margin-bottom: 8px; display: block;"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+          type="primary"
+          icon="search"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          Search
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters, column.dataIndex)">
           Reset
         </a-button>
       </div>
@@ -66,22 +63,21 @@
         type="search"
         :style="{ color: filtered ? '#108ee9' : undefined }"
       />
-      <template slot="customRender" slot-scope="text, record, index, column">
-      <span v-if="searchText && searchedColumn === column.dataIndex">
-        <template
-          v-for="(fragment, i) in text
-            .toString()
-            .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))"
-        >
-          <mark
-            v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-            :key="i"
-            class="highlight"
-          >{{ fragment }}</mark
-          >
-          <template v-else>{{ fragment }}</template>
-        </template>
-      </span>
+      <template slot="customRender" slot-scope="text">
+        <span v-if="searchText && searchedColumn === column.dataIndex">
+          <template
+            v-for="(fragment, i) in text
+              .toString()
+              .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+            <mark
+              v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+              :key="i"
+              class="highlight">
+              {{ fragment }}
+            </mark>
+            <template v-else>{{ fragment }}</template>
+          </template>
+        </span>
         <template v-else>
           {{ text }}
         </template>
@@ -90,14 +86,13 @@
       <span slot="state" slot-scope="tags">
         <a-badge :status="statePoint(tags)"></a-badge>
         {{tags | stateFun}}
-    </span>
+      </span>
 
-      <span slot="action" slot-scope="text, record">
-        <a  @click="edit(text.id,text.name,text.eventName,text.noticeWay,text.address,text.coinKind,text.addressMark,text.monitorMinVal)">编辑</a>
-        <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
-        <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
-        <a  @click="gotoLog(text.id)">提醒日志</a>
-        <!--{{text.coinKind}}{{text.addressMark}}{{text.monitorMinVal}}-->
+      <span slot="action" slot-scope="item">
+        <a @click.stop="editCurrentItem(item)">编辑</a>
+        <a v-show="item.state == 0"  @click.stop="forbidCurrentItem(item)">启用</a>
+        <a v-show="item.state == 1"  @click.stop="forbidCurrentItem(item)">停用</a>
+        <a @click.stop="gotoLog(item)">提醒日志</a>
       </span>
       <span slot="noticeWay" slot-scope="way">
         {{way | noticeWayFun}}
@@ -106,9 +101,19 @@
         {{time | timeFilter}}
       </span>
     </a-table>
+    <div class="page">
+      <a-pagination
+        :defaultCurrent="currentPage"
+        :current="currentPage"
+        :total=total
+        :pageSize="pageSize"
+        @change="onChange"
+        @onShowSizeChange="onShowSizeChange"
+        :pageSizeOptions="pageNt" />
+    </div>
     <!--添加-->
     <a-modal
-      title="添加地址监控规则"
+      title="添加监控事件规则"
       v-model="visible"
       cancelText="取消"
       okText="确定"
@@ -122,38 +127,32 @@
             <td>
               <p class="tmP">
                 <a-form-item label="监控用户" v-bind="formItemLayout">
-                <a-select
-                  show-search
-                  placeholder="请选择"
-                  option-filter-prop="children"
-                  style="width: 170px"
-                  :filter-option="filterOption"
-                  @focus="handleFocus"
-                  @blur="handleBlur"
-                  @change="handleChange"
-                  v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]"
-                >
-                  <a-select-option v-for="(item,i) in unique(searchNameList)" :value="item" :key="i">
-                    {{item}}
-                  </a-select-option>
-                </a-select>
+                  <a-select
+                    show-search
+                    placeholder="请选择"
+                    option-filter-prop="children"
+                    style="width: 170px"
+                    :filter-option="filterOption"
+                    @focus="handleFocus"
+                    @blur="handleBlur"
+                    @change="handleChange"
+                    v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户'}]}]"
+                  >
+                    <a-select-option v-for="item in searchNameList" :value="JSON.stringify(item)" :key="item.id">
+                      {{item.name}}
+                    </a-select-option>
+                  </a-select>
                 </a-form-item>
               </p>
-              <!--<p class="tmP">
-                <a-form-item label="监控用户">
-                  <a-select style="width: 170px"  placeholder="请选择" v-model="uploadData.userName" v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]"></a-select>
-                </a-form-item>
-              </p>-->
             </td>
-            <td rowspan="2"  >
+            <td rowspan="2">
             </td>
           </tr>
           <tr>
             <td>
-              <p class="tmP" >
+              <p class="tmP">
                 <span>&nbsp;&nbsp;&nbsp;监控事件:&nbsp;&nbsp;</span>
-                <a-input  style="flex: 1; width: 170px" placeholder="给目标起个名字" type="text"
-                          :rows="3" v-model="uploadData.eventName"/>      &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+                <a-input style="flex: 1; width: 170px" placeholder="给目标起个名字" type="text" :rows="3" v-model="uploadData.eventName"/>      &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
               </p>
             </td>
           </tr>
@@ -176,43 +175,28 @@
             </td>
           </tr>
           <tr>
-            <td  style="display: flex">
+            <td style="display: flex">
               <div style="margin-top: 10px ">&nbsp;&nbsp;&nbsp;地址信息:&nbsp;&nbsp;</div>
             </td>
-
-
             <td width="1000px">
               <a-form-item
                 v-for="(k, index) in form.getFieldValue('keys')"
                 :key="k"
-                :required="false"
-              >
+                :required="false">
                 <div>
-                <a-select
-                  v-decorator="[
-                  `coinKind[${k}]`,
-                  {
-                    rules: [
-                      {
-                        required: true,
-                        whitespace: true,
-                        message: '请选择币种',
-                      },
-                    ],
-                  },
-                ]"
-                  placeholder="请选择币种"
-                  style="width: 150px; margin-right: 8px"
-                  v-model="dataObj.coinKind[index]"
-                >
-                  <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">
-                    {{item}}
-                  </a-select-option>
-                </a-select>
-                --
-                <a-input
-                  v-model="dataObj.address[index]"
-                  v-decorator="[
+                  <a-select
+                    v-decorator="[`coinKind[${k}]`,{rules: [{ required: true, whitespace: true, message: '请选择币种'}]}]"
+                    placeholder="请选择币种"
+                    style="width: 150px; margin-right: 8px"
+                    v-model="dataObj.coinKind[index]">
+                    <a-select-option v-for="item in mainChainList" :value="JSON.stringify(item)" :key="item.id">
+                      {{item.coinName}}
+                    </a-select-option>
+                  </a-select>
+                  --
+                  <a-input
+                    v-model="dataObj.address[index]"
+                    v-decorator="[
                      `address[${k}]`,
                       {
                         validateTrigger: ['change', 'blur'],
@@ -221,52 +205,41 @@
                             required: true,
                             whitespace: true,
                             message: '请输入地址',
-                          },
-                        ],
-                      },
+                          }
+                        ]
+                      }
                     ]"
-                  placeholder="请输入地址"
-                  @change="validataAddr2"
-                  @blur="validataAddr2"
-                  style="width: 250px; margin-right: 8px"
-                />
-                <!-- <a-input
-                   v-model="dataObj.address[index]"
-                   placeholder="请输入地址"
-                   style="width: 250px; margin-right: 8px"
-                 />-->
-                --
-                <a-input
-                  v-decorator="[
+                    placeholder="请输入地址"
+                    @change="validataAddr2"
+                    @blur="validataAddr2"
+                    style="width: 250px; margin-right: 8px"/>
+                  --
+                  <a-input
+                    v-decorator="[
                      `aMark[${k}]`,
-                      {
-
-                      },
+                      {},
                     ]"
-                  placeholder="请输入地址标注"
-                  v-model="dataObj.addressMark[index]"
-                  style="width: 150px; margin-right: 8px"
-
-                />
-                --
-                <a-input
-                  v-decorator="[
+                    placeholder="请输入地址标注"
+                    v-model="dataObj.addressMark[index]"
+                    style="width: 150px; margin-right: 8px"
+                  />
+                  --
+                  <a-input
+                    v-decorator="[
                      `min[${k}]`,
-                      {
-
-                      },
+                      {},
                     ]"
-                  placeholder="请输入监控阈值"
-                  v-model="dataObj.monitorMinVal[index]"
-                  style="width: 150px; margin-right: 8px"></a-input>
-                <!--右侧的图标-->
-                <a-icon
-                  v-if="form.getFieldValue('keys').length > 0"
-                  class="dynamic-delete-button"
-                  type="minus-circle-o"
-                  :disabled="form.getFieldValue('keys').length === 0"
-                  @click="() => remove(k)"
-                />
+                    placeholder="请输入监控阈值"
+                    v-model="dataObj.monitorMinVal[index]"
+                    style="width: 150px; margin-right: 8px"></a-input>
+                  <!--右侧的图标-->
+                  <a-icon
+                    v-if="form.getFieldValue('keys').length > 0"
+                    class="dynamic-delete-button"
+                    type="minus-circle-o"
+                    :disabled="form.getFieldValue('keys').length === 0"
+                    @click="() => remove(k)"
+                  />
                 </div>
                 <div class="va2" :name="va2">请输入地址</div>
               </a-form-item>
@@ -277,19 +250,15 @@
                   <a-icon type="plus" /> 添加
                 </a-button>
               </a-form-item>
-              <!--<a-form-item v-bind="formItemLayoutWithOutLabel">
-              </a-form-item>-->
             </td>
-
           </tr>
-
         </table>
       </a-form>
     </a-modal>
 
     <!--编辑-->
     <a-modal
-      title="编辑地址监控规则"
+      title="编辑监控事件规则"
       v-model="editVisible"
       cancelText="取消"
       okText="确定"
@@ -297,7 +266,7 @@
       @cancel="editCancelClick"
       width="1200px"
     >   <!--以下是点击编辑规则 然后弹出的那个框里面的内容-->
-      <a-form :form="editForm" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" >
+      <a-form :form="editForm" :label-col="{span: 5}" :wrapper-col="{ span: 12 }" >
         <table >
           <tr>
             <td>
@@ -312,10 +281,9 @@
                     @focus="handleFocus"
                     @blur="handleBlur"
                     @change="handleChange"
-                    v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户',},],},]"
-                  >
-                    <a-select-option v-for="(item,i) in unique(searchNameList)" :value="item" :key="i">
-                      {{item}}
+                    v-decorator="['userName',{rules: [{required: true,whitespace: true,message: '请输入监控用户'}]}]">
+                    <a-select-option v-for="item in searchNameList" :value="JSON.stringify(item)" :key="item.id">
+                      {{item.name}}
                     </a-select-option>
                   </a-select>
                 </a-form-item>
@@ -341,7 +309,7 @@
               <br><br>
             </td>
             <td>
-              <a-checkbox-group  v-model="notice" >
+              <a-checkbox-group v-model="notice" >
                 <a-row>
                   <a-checkbox value="0">短信</a-checkbox>
                   <a-checkbox value="1">邮件</a-checkbox>
@@ -353,113 +321,109 @@
           </tr>
           <tr>
             <td style="display: flex">
-              <div style="margin-top: 10px">&nbsp;&nbsp;&nbsp;地址信息:&nbsp;&nbsp;</div>
+              <div style="margin-top: 5px;">&nbsp;&nbsp;&nbsp;地址信息:&nbsp;&nbsp;</div>
             </td>
             <td>
-              <a-form-item
-                v-for="(k, index) in editForm.getFieldValue('keys1')"
-                :key="k"
-                :required="false"
-              >
+              <div class="edit-rule-item" v-for="(item,index) in dataObj1.allData" :key="index">
                 <a-select
-                  v-decorator="[
-                  ,
-                  {
-                    rules: [
-                      {
-                        required: true,
-                        whitespace: true,
-                        message: '请选择币种',
-                      },
-                    ],
-                  },
-                ]"
+                  v-decorator="[{rules: [{ required: true, whitespace: true, message: '请选择币种'}]}]"
                   placeholder="请选择币种"
                   style="width: 150px; margin-right: 8px"
-                  v-model="dataObj1.coinKind[index]"
-                >
-                  <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">
-                    {{item}}
+                  v-model="item.coinKind">
+                  <a-select-option v-for="coin in mainChainList" :value="JSON.stringify(coin)" :key="coin.id">
+                    {{coin.coinName}}
                   </a-select-option>
                 </a-select>
                 --
                 <a-input
-                  v-decorator="[
-                  ,
-                  {
+                  v-decorator="[{
                     validateTrigger: ['change', 'blur'],
-                    rules: [
-                      {
-                        required: true,
-                        whitespace: true,
-                        message: '请输入地址',
-                      },
-                    ],
-                  },
-                ]"
+                    rules: [{ required: true, whitespace: true, message: '请输入地址'}]
+                  }]"
                   placeholder="请输入地址"
                   style="width: 250px; margin-right: 8px"
-                  v-model="dataObj1.address[index]"
-                  @change="validataAddr1"
-                />
+                  v-model="item.address"
+                  @change="validataAddr1" />
                 --
                 <a-input
                   placeholder="请输入地址标注"
-                  v-model="dataObj1.addressMark[index]"
-                  style="width: 150px; margin-right: 8px"
-                />
+                  v-model="item.addressMark"
+                  style="width: 150px; margin-right: 8px" />
                 --
                 <a-input
                   placeholder="请输入监控阈值"
-                  v-model="dataObj1.monitorMinVal[index]"
-                  style="width: 150px; margin-right: 8px"
-                />
-                <!--编辑右侧的图标-->
-                <!--<a-icon
-                  v-if="editForm.getFieldValue('keys1').length > 0"
+                  v-model="item.monitorMinVal"
+                  style="width: 150px; margin-right: 8px" />
+                <a-icon
+                  v-if="dataObj1.allData.length > 0"
                   class="dynamic-delete-button"
                   type="minus-circle-o"
-                  :disabled="editForm.getFieldValue('keys1').length === 0"
-                  @click="() => remove1(k)"
-                />-->
-              </a-form-item>
-              <div class="va" id="va">请输入地址</div>
-              <a-form-item v-if="false" v-bind="formItemLayoutWithOutLabel" style="width: 800px">
-                <a-button type="dashed" style="width: 147%" @click="add1">
+                  :disabled="dataObj1.allData.length === 0"
+                  @click="removeCurrentItem(index)"/>
+              </div>
+
+<!--              <a-form-item v-for="(k, index) in editForm.getFieldValue('keys1')"-->
+<!--                           :key="k"-->
+<!--                           :required="false">-->
+<!--                <a-select-->
+<!--                  v-decorator="[{rules: [{ required: true, whitespace: true, message: '请选择币种'}]}]"-->
+<!--                  placeholder="请选择币种"-->
+<!--                  style="width: 150px; margin-right: 8px"-->
+<!--                  v-model="dataObj1.coinKind[index]">-->
+<!--                  <a-select-option v-for="item in mainChainList" :value="JSON.stringify(item)" :key="item.id">-->
+<!--                    {{item.coinName}}-->
+<!--                  </a-select-option>-->
+<!--                </a-select>-->
+<!--                &#45;&#45;-->
+<!--                <a-input-->
+<!--                  v-decorator="[{-->
+<!--                    validateTrigger: ['change', 'blur'],-->
+<!--                    rules: [{ required: true, whitespace: true, message: '请输入地址'}]-->
+<!--                  }]"-->
+<!--                  placeholder="请输入地址"-->
+<!--                  style="width: 250px; margin-right: 8px"-->
+<!--                  v-model="dataObj1.address[index]"-->
+<!--                  @change="validataAddr1" />-->
+<!--                &#45;&#45;-->
+<!--                <a-input-->
+<!--                  placeholder="请输入地址标注"-->
+<!--                  v-model="dataObj1.addressMark[index]"-->
+<!--                  style="width: 150px; margin-right: 8px" />-->
+<!--                &#45;&#45;-->
+<!--                <a-input-->
+<!--                  placeholder="请输入监控阈值"-->
+<!--                  v-model="dataObj1.monitorMinVal[index]"-->
+<!--                  style="width: 150px; margin-right: 8px" />-->
+<!--                <a-icon-->
+<!--                  v-if="editForm.getFieldValue('keys1').length > 0"-->
+<!--                  class="dynamic-delete-button"-->
+<!--                  type="minus-circle-o"-->
+<!--                  :disabled="editForm.getFieldValue('keys1').length === 0"-->
+<!--                  @click="() => remove1(k)"/>-->
+<!--              </a-form-item>-->
+
+<!--              <div class="va" id="va">请输入地址</div>-->
+              <a-form-item v-bind="formItemLayoutWithOutLabel" style="width: 800px">
+                <a-button type="dashed" style="width: 147%" @click="addNewItem">
                   <a-icon type="plus" /> 添加
                 </a-button>
               </a-form-item>
-              <!--<a-form-item v-bind="formItemLayoutWithOutLabel">
-              </a-form-item>-->
-
             </td>
           </tr>
         </table>
       </a-form>
     </a-modal>
-
-    <div class="page">
-      <a-pagination
-        showQuickJumper showSizeChanger
-        :defaultCurrent="1"
-        :total=total
-        :pageSize="pageSize"
-        @change="onChange"
-        @showSizeChange="onShowSizeChange"
-        :pageSizeOptions="pageNt" />
-    </div>
   </div>
-
-
-
-
 </template>
 
 <script>
   import { Message } from 'element-ui'
+  import coinMixin from "../mixin/coinMixin";
 
 let id = 0;
 export default {
+  name: 'AddressMonitor',
+  mixins: [coinMixin],
   data() {
     return {
       va2:[],
@@ -477,7 +441,7 @@ export default {
       searchVal:'',
       pagination:false,
       currentPage:1,
-      pageSize:8,
+      pageSize:10,
       total:0,
       pageNt:['8','10','20','30'],
       dataObj:{
@@ -529,24 +493,20 @@ export default {
       columns: [
         {
           title: '监控用户',
-          dataIndex: 'name',
+          dataIndex: 'userName',
           key: 'name',
+         // width:'200px',
           scopedSlots: {
-            filterDropdown: 'filterDropdown',
+            filterDropdown: 'userNameFilterDropdown',
             filterIcon: 'filterIcon',
             customRender: 'customRender',
           },
-          onFilter: (value, record) =>
-            record.name
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                const input = document.getElementById("searchInput1")
-                input.focus()
-               // this.searchInput.focus();
+                //const input = document.getElementById("searchInput1")
+               // input.focus()
+                this.searchInput.focus();
               }, 0);
             }
           },
@@ -555,22 +515,18 @@ export default {
           title: '监控事件',
           dataIndex: 'eventName',
           key: 'eventName',
+        //  width:'250px',
           scopedSlots: {
-            filterDropdown: 'filterDropdown1',
+            filterDropdown: 'eventNameFilterDropdown',
             filterIcon: 'filterIcon',
-            customRender: 'customRender',
+            customRender: 'customRender1',
           },
-          onFilter: (value, record) =>
-            record.eventName
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
-                const input = document.getElementById("searchInput2")
-                input.focus()
-                //this.searchInput.focus();
+                //const input = document.getElementById("searchInput2")
+                //input.focus()
+                this.searchInput.focus();
               }, 0);
             }
           },
@@ -579,14 +535,16 @@ export default {
           title: '通知方式',
           dataIndex: 'noticeWay',
           key: 'noticeWay',
+        //  width:'300px',
           scopedSlots: {
             customRender: 'noticeWay',
           }
         },
         {
           title: '添加时间',
-          dataIndex: 'eventAddTime',
-          key: 'eventAddTime',
+          dataIndex: 'createTime',
+          key: 'createTime',
+        //  width:'250px',
           scopedSlots: {
             customRender: 'eventAddTime',
           }
@@ -595,6 +553,7 @@ export default {
           title: '状态',
           dataIndex: 'state',
           key: 'state',
+       //   width:'200px',
           scopedSlots: {
             customRender: 'state',
           }
@@ -624,14 +583,14 @@ export default {
           sm: { span: 16, offset: 0 },
         },
       },
+      // userName: '', // 检索的用户名 暂时 searchName1
+      // eventName: '', // 检索的监控事件名称 searchEvent1
     };
   },
   beforeCreate() {
     this.form = this.$form.createForm(this, { name: 'dynamic_form_item' });
     this.editForm = this.$form.createForm(this, { name: 'coordinated' });
     this.form.getFieldDecorator('keys', { initialValue: [], preserve: true });
-    console.log('hello')
-    console.log(this.form.getFieldValue('keys')[0]);
     this.editForm.getFieldDecorator('keys1', { initialValue: [], preserve: true });
     /*this.$nextTick(_ => {
       this.editForm.setFieldsValue(this.uploadData2)
@@ -640,7 +599,6 @@ export default {
   methods: {
     validataAddr1(){
       for(let i=0;i<this.dataObj1.address.length;i++) {
-        console.log(this.dataObj1.address[i])
         if (this.dataObj1.address[i]=="") {
           setTimeout(function () {
             document.getElementById("va").style.color = "red";
@@ -659,7 +617,6 @@ export default {
       let temp=[];
       for(let i=0;i<this.dataObj.address.length;i++) {
         if (this.dataObj.address[i]=="") {
-          console.log(this.dataObj.address[i])
           temp[i]=document.getElementsByName(this.va2)[i];
           setTimeout(function () {
             temp[i].style.display="block"
@@ -675,26 +632,6 @@ export default {
         }
       }
     },
-    /*validataAddr2(){
-      let temp=[];
-      for(let i=0;i<this.dataObj.address.length;i++) {
-        if (this.dataObj.address[i]=="") {
-          console.log(this.dataObj.address[i])
-          temp[i]=document.getElementsByName(this.va2)[i];
-          setTimeout(function () {
-            temp[i].style.display="block"
-          }, 0);
-          this.isValidata2=true;
-        }
-        else  {
-          temp[i]=document.getElementsByName(this.va2)[i];
-          setTimeout(function () {
-            temp[i].style.display="none"
-          }, 0);
-          this.isValidata2=false;
-        }
-      }
-    },*/
     searchNameAjax(){
       this.isName = true
       this.$ajax({
@@ -708,7 +645,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total = res.data.data.total
@@ -732,7 +668,6 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total = res.data.data.total
@@ -761,7 +696,6 @@ export default {
           name:this.searchVal
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           alert(res.data.data)
         }
@@ -771,48 +705,52 @@ export default {
 
       })
     },
-    getDataList(){
-      let that = this;
-      that.$ajax({
-        method:"get",
-        url:'/monitor/admin/addr-rules',
-        params:{
-          event:'',
-          userName:'',
-          userId:'',
-          currentPage:that.currentPage,
-          pageSize:that.pageSize,
+    // 启用停用当前的监控事件
+    forbidCurrentItem(item) {
+      let params = {
+        ...item,
+        state: item.state == 0 ? 1 : 0
+      }
+      delete params.createTime
+      delete params.updateTime
+      this.$ajax.put('/monitor/admin/events/state', params).then(res => {
+        const {code, msg} = res.data
+        if (code == 1001) {
+          Message.success(msg)
+        } else {
+          Message.error(msg)
         }
-      }).then(res=>{
-        console.log(res)
-        if(res.data.code == '1001'){
-          that.dataList = res.data.data.data
-          that.total=res.data.data.total
+        this.commonFetchData()
+      })
+    },
+    // 通用的获取数据接口
+    commonFetchData(){
+      this.$ajax.get('/monitor/admin/events', {
+        params: {
+          page: this.currentPage - 1,
+          size: this.pageSize,
+          userName: this.searchName1,
+          eventName: this.searchEvent1
+        }
+      }).then(res => {
+        const eventsData = res.data
+        const { code, data: {content, totalElements}, msg} = eventsData
+        if (code == 1001) {
+          this.dataList = content.map(item => {
+            item.key = item.id
+            return item
+          })
+          this.total = totalElements
+        } else {
+          this.dataList = []
+          this.total = 0
+          Message.error(msg)
         }
       })
     },
-    addAddressDataList(){
-      var list=[]
-      class obj{
-        userName
-        eventName
-        noticeWay
-        coinKind
-        address
-        addressMark
-        monitorMinVal
-        constructor(userName,eventName,noticeWay,coinKind,address,addressMark,monitorMinVal) {
-          this.userName=userName;
-          this.eventName=eventName
-          this.noticeWay=noticeWay;
-          this.coinKind=coinKind;
-          this.address=address;
-          this.addressMark=addressMark;
-          this.monitorMinVal=monitorMinVal;
-        }
-      }
+    // 转换通知方式为数字
+    changeNoticeWayToNum(mid) {
       let notice;
-      let mid=this.uploadData.noticeWay
       switch(mid.length){
         case 1:
           notice = new Number(mid[0]);
@@ -834,134 +772,219 @@ export default {
           notice = 6
           break
       }
-      for (let i = 0; i <this.dataObj.coinKind.length ; i++) {
-        list.push(new obj(
-          this.form.getFieldValue('userName'),
-          this.uploadData.eventName,
-          notice.toString(),
-          this.dataObj.coinKind[i],
-          this.dataObj.address[i],
-          this.dataObj.addressMark[i],
-          this.dataObj.monitorMinVal[i])
-        )
+      return notice
+    },
+    // 将通知方式转换为数组
+    changeNoticeWayToArray(noticeWay) {
+      switch(noticeWay) {
+          case 0:
+            this.notice = ['0']
+            break
+          case 1:
+            this.notice = ['1']
+            break
+          case 2:
+            this.notice = ['2']
+            break
+          case 3:
+            this.notice= ['0','1']
+            break
+          case 4:
+            this.notice=['0','2']
+            break
+          case 5:
+            this.notice=['1','2']
+            break
+          case 6:
+            this.notice=['0','1','2']
+            break
+        }
+    },
+    // 点击添加后的确认按钮
+    addAddressDataList(){
+      const mid = this.uploadData.noticeWay
+      const notice = this.changeNoticeWayToNum(mid)
+
+      const userInfo = JSON.parse(this.form.getFieldValue('userName'))
+      const eventInfo = {
+        eventName: this.uploadData.eventName,
+        noticeWay: notice,
+        userName: userInfo.name,
+        userId: userInfo.id,
+        state: 1
+      }
+
+      const addrRules = this.dataObj.coinKind.map((item, index) => {
+        const coinInfo = JSON.parse(item)
+        return {
+          coinKind: coinInfo.contractAddr,
+          address: this.dataObj.address[index].trim(),
+          addressMark: this.dataObj.addressMark[index],
+          monitorMinVal: this.dataObj.monitorMinVal[index]
+        }
+      })
+
+      const data = {
+        "event": eventInfo,
+        addrRules
       }
 
       this.$ajax({
         method:"post",
-        url:'/monitor/admin/addr-rules',
-        data: list
+        url:'/monitor/admin/events',
+        data
       }).then(res=>{
         if(res.data.code=='1001'){
-          alert('添加成功')
-          this.getDataList();
+          Message.success('添加成功')
+          this.visible = false;
+          this.commonFetchData();
         }else{
-          alert('添加失败')
+          Message.error('添加失败')
         }
       })
     },
-//编辑ajax
+    //编辑ajax
     editDataList1(){
-      var list=[]
-      class obj{
-        uid
-        id
-        eventName
-        noticeWay
-        coinKind
-        address
-        addressMark
-        monitorMinVal
-        constructor(uid,id,eventName,noticeWay,coinKind,address,addressMark,monitorMinVal) {
-          this.uid=uid;
-          this.id=0;
-          this.eventName=eventName
-          this.noticeWay=noticeWay;
-          this.coinKind=coinKind;
-          this.address=address;
-          this.addressMark=addressMark;
-          this.monitorMinVal=monitorMinVal;
-        }
-      }
-      let notice
-      let mid=this.notice
-      let length = mid.length
-      switch(length){
-        case 1:
-          this.notice = Number(mid[0]);
-          break
-        case 2:
-          switch (Number(mid[0])+Number(mid[1])){
-            case 1:
-              this.notice=3
-              break
-            case 2:
-              this.notice = 4
-              break
-            case 3:
-              this.notice = 5
-              break
-          }
-          break
-        case 3:
-          this.notice = 6
-          break
-      }
-      for (let i = 0; i <this.dataObj1.coinKind.length ; i++) {
-        list.push(new obj(this.dataObj1.id,
-          this.dataObj1.userName,
-          this.dataObj1.eventName,
-          this.notice,
-          this.dataObj1.coinKind[i],
-          this.dataObj1.address[i],
-          this.dataObj1.addressMark[i],
-          this.dataObj1.monitorMinVal[i]))
-      }
-      let that = this;
-      that.$ajax({
-        method:"put",
-        url:'/monitor/admin/addr-rules',
-        data:list,
-      }).then(res=>{
-        if(res.data.code=='1001'){
-          alert('修改成功')
-          this.getDataList()
-        }else{
-          alert('修改失败')
-        }
-      })
-    },
+      const notice = this.changeNoticeWayToNum(this.notice)
 
+      const tmpArr = this.dataObj1.allData.filter(item => item.coinKind == '' || item.address == '')
+      if (tmpArr.length > 0) {
+        Message.warning("请补充完整信息再提交")
+        return
+      }
+
+      const userInfo = JSON.parse(this.dataObj1.userName)
+      const eventInfo = {
+        eventName: this.dataObj1.eventName,
+        id: this.dataObj1.id,
+        noticeWay: notice,
+        userName: userInfo.name,
+        userId: userInfo.id,
+        state: this.dataObj1.state
+      }
+
+      const addrRules = this.dataObj1.allData.map(item => {
+        const coinInfo = JSON.parse(item.coinKind)
+        let obj = {
+          coinKind: coinInfo.contractAddr,
+          address: item.address.trim(),
+          addressMark: item.addressMark,
+          monitorMinVal: item.monitorMinVal
+        }
+        if (item.id != undefined || item.id > 0) {
+          obj = {
+            ...obj,
+            id: item.id
+          }
+        }
+        return obj
+      })
+
+      const toDeleteAddrRuleIds =
+        this.dataObj1.originData.filter(item => this.dataObj1.allData.findIndex(c => item.id == c.id) == -1).map(i => i.id)
+
+      const data = {
+        "event": eventInfo,
+        addrRules,
+        toDeleteAddrRuleIds
+      }
+
+      this.$ajax.put('/monitor/admin/events', data).then(res => {
+        const { msg, code} = res.data
+        if (code == 1001) {
+          Message.success("修改成功")
+          this.editVisible = false;
+          this.commonFetchData()
+        } else {
+          Message.error(msg)
+        }
+
+      })
+
+      // var list=[]
+      // class obj{
+      //   uid
+      //   id
+      //   eventName
+      //   noticeWay
+      //   coinKind
+      //   address
+      //   addressMark
+      //   monitorMinVal
+      //   constructor(uid,id,eventName,noticeWay,coinKind,address,addressMark,monitorMinVal) {
+      //     this.uid=uid;
+      //     this.id=0;
+      //     this.eventName=eventName
+      //     this.noticeWay=noticeWay;
+      //     this.coinKind=coinKind;
+      //     this.address=address.trim();
+      //     this.addressMark=addressMark;
+      //     this.monitorMinVal=monitorMinVal;
+      //   }
+      // }
+      // let notice
+      // let mid=this.notice
+      // let length = mid.length
+      // switch(length){
+      //   case 1:
+      //     this.notice = Number(mid[0]);
+      //     break
+      //   case 2:
+      //     switch (Number(mid[0])+Number(mid[1])){
+      //       case 1:
+      //         this.notice=3
+      //         break
+      //       case 2:
+      //         this.notice = 4
+      //         break
+      //       case 3:
+      //         this.notice = 5
+      //         break
+      //     }
+      //     break
+      //   case 3:
+      //     this.notice = 6
+      //     break
+      // }
+      // for (let i = 0; i <this.dataObj1.coinKind.length ; i++) {
+      //   list.push(new obj(this.dataObj1.id,
+      //     this.dataObj1.userName,
+      //     this.dataObj1.eventName,
+      //     this.notice,
+      //     this.dataObj1.coinKind[i],
+      //     this.dataObj1.address[i],
+      //     this.dataObj1.addressMark[i],
+      //     this.dataObj1.monitorMinVal[i]))
+      // }
+      // let that = this;
+      // that.$ajax({
+      //   method:"put",
+      //   url:'/monitor/admin/addr-rules',
+      //   data:list,
+      // }).then(res=>{
+      //   if(res.data.code=='1001'){
+      //     Message.success('修改成功')
+      //     this.editVisible = false;
+      //     this.commonFetchData()
+      //   }else{
+      //     Message.error('修改失败')
+      //   }
+      // })
+    },
+    // 获取用户列表
     searchAddressInfo(){
       this.$ajax({
         method:"get",
         url:'/monitor/admin/users/list',
       }).then(res=>{
         if(res.data.code=='1001'){
-
-          this.dataList2 = res.data.data.data;
-          Object.keys(this.dataList2).forEach(key=>{
-            let name = this.dataList2[key].name
-            // let coinKind = that.dataList[key].coinKind
-            this.searchNameList.push(name)
-            // that.searchCoinList.push(coinKind)
-          })
+          this.searchNameList = res.data.data.data
+        } else {
+          this.searchNameList = []
         }
       })
     },
-    searchCoinListFun(){
-      this.$ajax({
-        method:"get",
-        url:'monitor/admin/coinlist',
-      }).then(res=>{
-        if(res.data.code==1001){
-          this.mainChainList = res.data.data;
-        }
-      })
-    },
-    unique(array) {
-      return Array.from(new Set(array));
-    },
-    edit(id,name,eventName,noticeWay,address,coinKind,addressMark,monitorMinVal){
+    editCurrentItem(item) {
       setTimeout(function () {
         document.getElementById("va").style.color = "white";
       },0);
@@ -970,45 +993,66 @@ export default {
       editForm.setFieldsValue({
         keys1: [],
       });
-      this.searchAddressInfo();
-      this.searchCoinListFun()
-      this.dataObj1.id = id;
-      this.dataObj1.userName = name;
-      this.dataObj1.eventName= eventName;
-      this.dataObj1.coinKind[0]=coinKind
-      this.dataObj1.address[0]=address;
-      this.dataObj1.addressMark[0]=addressMark ;
-      this.dataObj1.monitorMinVal[0]=monitorMinVal;
-      switch(noticeWay){
-        case 0:
-          this.notice = ['0']
-          break
-        case 1:
-          this.notice = ['1']
-          break
-        case 2:
-          this.notice = ['2']
-          break
-        case 3:
-          this.notice= ['0','1']
-          break
-        case 4:
-          this.notice=['0','2']
-          break
-        case 5:
-          this.notice=['1','2']
-          break
-        case 6:
-          this.notice=['0','1','2']
-          break
-      }
-
-      this.add1();
-      this.editVisible = true;
-      this.$nextTick(_ => {
-        this.editForm.setFieldsValue(this.dataObj1)
+      this.$ajax.get(`/monitor/admin/events/rules?eventId=${item.id}`).then(res => {
+        const { code, msg, data} = res.data
+        if (code == 1001) {
+          // 获取基础信息
+          if (data.length > 0) {
+            const { eventName, userName, noticeWay, eventId, userId, state } = data[0]
+            // 设置通知方式
+            this.changeNoticeWayToArray(noticeWay)
+            this.dataObj1.id = eventId
+            this.dataObj1.state = state
+            const userInfo = this.searchNameList.filter(item => item.id == userId )
+            if (userInfo && userInfo.length > 0) {
+              this.dataObj1.userName = JSON.stringify(userInfo[0])
+            }
+            this.dataObj1.eventName = eventName
+            // 展示用的数据
+            this.dataObj1.allData = data.map(item => {
+              const { coinKind } = item
+              const coinInfo = this.coinType.filter(item => item.contractAddr == coinKind)
+              if (coinInfo && coinInfo.length > 0) {
+                item.coinKind = JSON.stringify(coinInfo[0])
+              }
+              return item
+            })
+            this.dataObj1.originData = data
+            // debugger
+            this.editVisible = true;
+            this.$nextTick(_ => {
+              this.editForm.setFieldsValue(this.dataObj1)
+            })
+          }
+        } else {
+          this.dataObj1.allData = {}
+          this.dataObj1.originData = []
+          Message.error(msg)
+        }
       })
-
+    },
+    // 删除当前
+    removeCurrentItem(index) {
+      this.dataObj1.allData.splice(index, 1)
+      const dataObj1 = {
+        ...this.dataObj1
+      }
+      this.dataObj1 = dataObj1
+    },
+    // 添加新的地址信息
+    addNewItem() {
+      const data = this.dataObj1.allData
+      data.push({
+        address: '',
+        addressMark: '',
+        coinKind: '',
+        monitorMinVal: ''
+      })
+      const dataObj1 = {
+        ...this.dataObj1,
+        allData: data
+      }
+      this.dataObj1 = dataObj1
     },
     startUse(id){
       let that = this;
@@ -1021,10 +1065,10 @@ export default {
       }).then(res=>{
         if(res.data.code == "1001"){
           alert('成功重新启用此用户')
-          that.getDataList();
+          that.commonFetchData();
         }else {
           alert('启用此用户失败')
-          that.getDataList();
+          that.commonFetchData();
 
         }
       })
@@ -1042,11 +1086,11 @@ export default {
         if(res.data.code == "1001"){
           //that.$message.success(res.data.msg);
           alert('成功禁用此规则')
-          that.getDataList();
+          that.commonFetchData();
         }else {
           //that.$message.error(res.data.msg)
           alert('禁用此规则失败')
-          that.getDataList();
+          that.commonFetchData();
 
         }
       })
@@ -1083,10 +1127,10 @@ export default {
         keys: nextKeys,
       });
     },
-    add1() {
+    add1(id) {
       const { editForm } = this;
       const keys1 = editForm.getFieldValue('keys1');
-      const nextKeys1 = keys1.concat(id++);
+      const nextKeys1 = keys1.concat(id);
       editForm.setFieldsValue({
         keys1: nextKeys1,
       });
@@ -1096,8 +1140,6 @@ export default {
       this.form.validateFields(err=>{
         if(!err  && (this.isValidata2==false) && this.uploadData.noticeWay!=''){
           this.addAddressDataList();
-          this.visible=false;
-          this.getDataList();
         }
         else if(this.uploadData.noticeWay==''){
           Message.error('请填写通知方式！')
@@ -1127,9 +1169,7 @@ export default {
       e.preventDefault();
       this.editForm.validateFields(err=>{
         if(!err && (this.isValidata1==false && this.notice!='')){
-          this.editVisible=false;
           this.editDataList1();
-          this.getDataList();
         }
         else if(this.notice==''){
           Message.error('请填写通知方式！')
@@ -1149,12 +1189,12 @@ export default {
       });
     },
 
-    gotoLog(id){
-      sessionStorage.setItem('id',id);
+    gotoLog(item){
+      sessionStorage.setItem('id2', JSON.stringify(item));
       //sessionStorage.setItem('name',name);
       this.$router.replace('/addressNoticeLog')
     },
-    showModal(){
+    addEventClickHandle(){
       const { form } = this;
       const keys = form.getFieldValue('keys');
       form.setFieldsValue({
@@ -1162,7 +1202,6 @@ export default {
       });
       this.visible = true;
       this.searchAddressInfo();
-      this.searchCoinListFun();
       this.add()
       this.uploadData = {
         userName:'',
@@ -1170,11 +1209,9 @@ export default {
         coinKind:'',
         noticeWay: [],
       }
-
       this.$nextTick(_ => {
         this.form.setFieldsValue(this.uploadData)
       })
-
     },
     statePoint(state){
       if(state==1){
@@ -1183,48 +1220,63 @@ export default {
       else
         return 'default';
     },
-    handleSearch(selectedKeys, confirm, dataIndex) {
+    handleSearch(selectedKeys, confirm) {
       confirm();
-      this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
+      this.currentPage = 1
+      this.commonFetchData()
     },
 
-    handleReset(clearFilters) {
+    handleReset(clearFilters, dataIndex) {
       clearFilters();
-      this.searchText = '';
+      if (dataIndex == 'eventName') {
+        this.searchEvent1 = ''
+      }
+      if (dataIndex == 'userName') {
+        this.searchName1 = '';
+      }
+      this.currentPage = 1
+      this.commonFetchData()
     },
 
     onChange(page,pageSize){
-      console.log(page,pageSize)
-      this.currentPage=page;
-      if(this.isName){
-        this.searchNameAjax()
-      }else if(this.isEvent){
-        this.searchEventAjax()
-      }
-      else{
-        this.getDataList();
-      }
+      this.currentPage = page;
+      this.pageSize = pageSize
+      this.commonFetchData()
+      // if(this.isName){
+      //   this.searchNameAjax()
+      // }else if(this.isEvent){
+      //   this.searchEventAjax()
+      // }
+      // else{
+      //   this.commonFetchData();
+      // }
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
+      this.currentPage = current
       this.pageSize = pageSize;
-      this.getDataList();
+      this.commonFetchData();
     },
     handleChange(value) {
-      console.log(`selected ${value}`);
+     //
     },
     handleBlur() {
-      console.log('blur');
+     //
     },
     handleFocus() {
-      console.log('focus');
+      //
     },
     filterOption(input, option) {
       return (
         option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
       );
     },
+    // 获取最新的币种信息
+    fetchAfterHasCoinType() {
+      // 获取数据
+      this.mainChainList = this.coinType
+      this.commonFetchData();
+      this.searchAddressInfo();
+    }
   },
   filters:{
     stateFun(state){
@@ -1263,19 +1315,20 @@ export default {
       let seconds = d.getSeconds();
       if (month < 10) month = '0' + month;
       if (day < 10) day = '0' + day;
-      if (hours < 0) hours = '0' + hours;
+      if (hours < 10) hours = '0' + hours;
       if (min < 10) min = '0' + min;
       if (seconds < 10) seconds = '0' + seconds;
       return (year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds);
-    },
+    }
   },
   mounted() {
-    this.getDataList();
-  },
-
+  }
 };
 </script>
 <style scoped>
+  .edit-rule-item {
+    margin-bottom: 10px;
+  }
 .ant-form-item-control-wrapper{
   display: inline-block;
 }
@@ -1319,5 +1372,8 @@ export default {
   display: none;
 
 }
+  .dynamic-delete-button {
+    cursor: pointer;
+  }
 </style>
 

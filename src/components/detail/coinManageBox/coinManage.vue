@@ -4,7 +4,7 @@
       <h2>监控币种管理</h2>
       <a-button type="primary" @click="showModal">添加</a-button>
     </div>
-    <a-table :columns="columns" :data-source="dataList" :pagination="pagination">
+    <a-table :columns="columns" :data-source="dataList" :pagination="pagination" @change="handleChange">
       <span slot="action" slot-scope="text, record">
         <a  @click="edit(text.id,text.mainChain,text.coinName,text.contractAddr,text.point)">编辑</a>
         <a @click="deleteChain(text.mainChain,text.coinName,text.contractAddr,text.point)">删除</a>
@@ -25,7 +25,7 @@
         <p class="tmp3">
           <a-form-item label="主链:" v-bind="formItemLayout">
             <a-select style="width: 300px" placeholder="请选择" v-model="uploadData.mainChain"   v-decorator="['mainChain',{rules: [{required: true,whitespace: true,message: '请选择主链',},],},]">
-              <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
+              <a-select-option v-for="(item,i) in getStrList(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
             </a-select>
           </a-form-item>
         </p>
@@ -64,7 +64,7 @@
         <p class="tmp3">
           <a-form-item label="主链:" v-bind="formItemLayout">
             <a-select style="width: 300px" placeholder="请选择" v-model="uploadData.mainChain"   v-decorator="['mainChain',{rules: [{required: true,whitespace: true,message: '请选择主链',},],},]">
-              <a-select-option v-for="(item,i) in unique(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
+              <a-select-option v-for="(item,i) in getStrList(mainChainList)" :value="item" :key="i">{{item}}</a-select-option>
             </a-select>
           </a-form-item>
         </p>
@@ -88,9 +88,9 @@
 
     <div class="page">
       <a-pagination
-        showQuickJumper showSizeChanger
         :defaultCurrent="1"
         :total=total
+        :current="currentPage"
         :pageSize="pageSize"
         @change="onChange"
         @showSizeChange="onShowSizeChange"
@@ -101,14 +101,15 @@
   </div>
 </template>
 <script>
+import { Message } from 'element-ui'
 export default {
   data() {
     return {
       dataList1:[],
       pagination:false,
       currentPage:1,
-      pageSize:8,
-      total:500,
+      pageSize:10,
+      total:0,
       pageNt:['8','10','20','30'],
       dataList:[],
       mainChainList:[],
@@ -145,25 +146,29 @@ export default {
           title: '主链',
           dataIndex: 'mainChain',
           key: 'mainChain',
+        //  width:'300px',
           filters:[],
-          onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
+        //  onFilter: (value, record) => record.mainChain.indexOf(value) === 0,
         },
         {
           title: '币种名称',
           dataIndex: 'coinName',
           key: 'coinName',
+        //  width:'300px',
           filters: [],
-          onFilter: (value, record) => record.coinName.indexOf(value) === 0,
+        //  onFilter: (value, record) => record.coinName.indexOf(value) === 0,
         },
         {
           title: '合约地址',
           dataIndex: 'contractAddr',
           key: 'contractAddr',
+        //  width:'400px',
         },
         {
           title: '小数位',
           dataIndex: 'point',
           key: 'point',
+        //  width:'200px',
         },
         {
           title: '操作',
@@ -179,17 +184,28 @@ export default {
   },
 
   methods: {
+    getStrList(array){
+      let list=[];
+      let str;
+      let strAll='';
+      Object.keys(array).forEach(key=>{
+        if(array[key][0] == '0' &&  array[key][1] =='x'){
+          array[key]= array[key].slice(2)
+        }
+        str = array[key];
+        list.push(str)
+      })
+      return this.unique(list)
+    },
     onChange(page,pageSize){
-      console.log(page,pageSize)
       this.currentPage=page;
       this.getDataList();
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getDataList();
     },
-    getDataList(){
+    /*getDataList(){
       this.$ajax({
         method:"get",
         url:'/monitor/admin/coin-kinds',
@@ -201,12 +217,103 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
         }
       })
+    },*/
+    async getDataList(){
+      let mainChain,coinKind
+      const  coinMain = await this.$ajax.get('monitor/admin/coinmain')
+      const {code,data} = coinMain.data
+      if(code ==1001 ){
+        const data1 = this.unique(data)
+        mainChain =data1.map(item=>{
+          return item ;
+        }).join(',')
+      }
+      const  coinList  =  await this.$ajax.get('monitor/admin/coinlist')
+      const {data :coinData,code:coinCode}=coinList.data
+      if(coinCode == 1001 ){
+        const data1 = this.unique(data)
+        coinKind = coinData.map(item =>{
+          return item
+        }).join(',')
+      }
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/coin-kinds',
+        params:{
+          mainChain: mainChain,
+          coinKind:coinKind,
+          currentPage:this.currentPage,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+      })
+    },
+    async handleChange(pagination, filters, sorter, { currentDataSource }){
+      const {mainChain,coinKind} = filters
+      if(mainChain.length !=0) {
+        const chain = mainChain.map(item => {
+          return item
+        }).join(',')
+        const coinList = await this.$ajax.get('monitor/admin/coinlist')
+        const {data: coinData, code: coinCode} = coinList.data
+        if (coinCode == 1001) {
+          const data1 = this.unique(coinData)
+          const coin = data1.map(item => {
+            return item
+          }).join(',')
+          this.currentPage = 1
+          const datalist  = await this.$ajax.get('/monitor/admin/coin-kinds',{
+            params:{
+              mainChain: chain,
+              coinKind: coin,
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data : dataL ,code :codeL} = datalist.data
+          if(codeL == 1001){
+            this.dataList = dataL.data
+            this.total = dataL.total
+          }
+        }
+      }
+      if(coinKind.length !=0 ){
+        const coin = coinKind.map(item =>{
+          return item
+        }).join(',')
+        const mainList = await this.$ajax.get('monitor/admin/coinmain')
+        const {data :mainData ,code :mainCode } = mainList.data
+        if(mainCode ==1001){
+          const data1  = this.unique(mainData)
+          const main =data1.map(item =>{
+            return item
+          }).join(',')
+          this.currentPage =1
+          const datalist  = await this.$ajax.get('/monitor/admin/coin-kinds',{
+            params:{
+              mainChain: main,
+              coinKind: coin,
+              currentPage:this.currentPage,
+              pageSize:this.pageSize,
+            }
+          })
+          const {data : dataL ,code :codeL} = datalist.data
+          if(codeL == 1001){
+            this.dataList = dataL.data
+            this.total = dataL.total
+          }
+        }
+      }
+
     },
 
     addDataList(){
@@ -256,8 +363,10 @@ export default {
 
     },
     deleteDataList(mainChain,coinName,contractAddr,point){
-      let that = this;
-      that.$ajax({
+      /*if(mainChain=='LTC' || mainChain=='BTC' || mainChain=='ETH' || mainChain=='BCH'){
+         Message.error('该币种不能删除！')
+      }*/
+      this.$ajax({
         method:"delete",
         url:'/monitor/admin/coin-kinds',
         params:{
@@ -268,7 +377,7 @@ export default {
         }
       }).then(res=>{
         if(res.data.code==1001){
-          that.getDataList();
+          this.getDataList();
           alert('删除成功');
         }
         else {
@@ -279,10 +388,11 @@ export default {
     searchCoinInfo(){
       this.$ajax({
         method:"get",
-        url:'monitor/admin/coinlist',
+        url:'monitor/admin/coinmain',
       }).then(res=>{
         if(res.data.code==1001){
           this.mainChainList2 = res.data.data;
+          this.mainChainList2=this.getStrList(this.mainChainList2)
           Object.keys(this.mainChainList2).forEach(key=>{
             let filterList = {
               text:this.mainChainList2[key],
@@ -296,7 +406,7 @@ export default {
     searchCoinInfo2(){
       this.$ajax({
         method:"get",
-        url:'monitor/admin/coinlist',
+        url:'monitor/admin/coinmain',
       }).then(res=>{
         if(res.data.code==1001){
           this.mainChainList = res.data.data;
@@ -310,6 +420,22 @@ export default {
     searchCoinKindNameList(){
       this.$ajax({
         method:"get",
+        url:'monitor/admin/coinlist',
+      }).then(res=>{
+        if(res.data.code==1001){
+          this.mainChainList2 = res.data.data;
+          this.mainChainList2=this.getStrList(this.mainChainList2)
+          Object.keys(this.mainChainList2).forEach(key=>{
+            let filterList = {
+              text:this.mainChainList2[key],
+              value:this.mainChainList2[key]
+            }
+            this.columns[1].filters.push(filterList)
+          })
+        }
+      })
+      /*this.$ajax({
+        method:"get",
         url:'/monitor/admin/coin-kinds',
         params:{
           event:'',
@@ -319,9 +445,9 @@ export default {
           pageSize:this.total,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.coinKindNameList = res.data.data.data
+          this.coinKindNameList=this.getStrList(this.coinKindNameList)
           Object.keys(this.coinKindNameList).forEach(key=>{
             let filterList = {
               text:this.coinKindNameList[key].coinName,
@@ -331,7 +457,7 @@ export default {
           })
 
         }
-      })
+      })*/
     },
     unique(array) {
       return Array.from(new Set(array));
@@ -371,7 +497,6 @@ export default {
     showModal() {
       this.searchCoinInfo2()
       this.visible = true;
-      this.searchCoinInfo();
       this.uploadData = {
         mainChain:'',
         tokenName:'',
@@ -384,7 +509,7 @@ export default {
       //this.fileList = [];
     },
     edit(id,mainChain,tokenName,contractAddr,point){
-      this.searchCoinInfo();
+      this.searchCoinInfo2();
       this.uploadData.id = id
       this.uploadData.mainChain= mainChain;
       this.uploadData.tokenName = tokenName;
@@ -419,6 +544,9 @@ export default {
     this.getDataList();
     this.searchCoinInfo();
     this.searchCoinKindNameList();
+    /*let a = ['0x11','0x11','0x22']
+    this.getStrList(a)
+    console.log('11',this.getStrList(a))*/
   }
 };
 </script>

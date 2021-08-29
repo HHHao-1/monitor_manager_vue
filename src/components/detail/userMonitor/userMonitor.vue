@@ -12,13 +12,11 @@
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
           style="padding: 8px"
-          id="test"
         >
-
-          <!--<a-input
+          <a-input
             v-ant-ref="c => (searchInput = c)"
             :placeholder="`Search ${column.dataIndex}`"
-            :value="selectedKeys[0]"
+            v-model="searchName"
             style="width: 188px; margin-bottom: 8px; display: block;"
             @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
             @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
@@ -34,8 +32,8 @@
           </a-button>
           <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
             Reset
-          </a-button>-->
-          <a-input
+          </a-button>
+          <!--<a-input
             id="searchInput"
             style="width: 188px; margin-bottom: 8px; display: block;"
             placeholder="Search Name"
@@ -53,7 +51,7 @@
           </a-button>
           <a-button size="small" style="width: 90px" @click="reset">
             Reset
-          </a-button>
+          </a-button>-->
         </div>
         <a-icon
           slot="filterIcon"
@@ -61,6 +59,7 @@
           type="search"
           :style="{ color: filtered ? '#108ee9' : undefined }"
         />
+<!--
         <template slot="customRender" slot-scope="text, record, index, column">
       <span v-if="searchText && searchedColumn === column.dataIndex">
         <template
@@ -81,6 +80,7 @@
             {{ text }}
           </template>
         </template>
+-->
         <span slot="state" slot-scope="tags">
         <a-badge :status="statePoint(tags)"></a-badge>
         {{tags | stateFun}}
@@ -89,7 +89,7 @@
         <a  @click="edit(text.name,text.phone,text.email,text.remark, text.id)">编辑</a>
         <a  v-show="text.state == 0"  @click="startUse(text.id)">启用</a>
         <a  v-show="text.state == 1"  @click="stopUse(text.id)">停用</a>
-        <a  @click="gotoLog(text.name)">提醒日志</a>
+        <a  @click="gotoLog(text)">提醒日志</a>
       </span>
         <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
           添加时间：{{ record.createTime | timeFilter}}
@@ -171,96 +171,18 @@
 
     <div class="page">
       <a-pagination
-        showQuickJumper showSizeChanger
         :defaultCurrent="1"
+        :current="currentPage"
         :total=total
         :pageSize="pageSize"
         @change="onChange"
-        @showSizeChange="onShowSizeChange"
-        :pageSizeOptions="pageNt" />
+        @showSizeChange="onShowSizeChange"/>
     </div>
 
   </div>
 </template>
 <script>
 let flag=false
-const columns = [
-  {
-    title: 'AppID',
-    dataIndex: 'appId',
-    key: 'appId',
-  },
-  {
-    title: 'UID',
-    dataIndex: 'id',
-    key: 'id',
-
-  },
-  { title: '用户名',
-    dataIndex: 'name',
-    key: 'name',
-    scopedSlots: {
-      filterDropdown: 'filterDropdown',
-      filterIcon: 'filterIcon',
-      customRender: 'customRender',
-    },
-    onFilter: (value, record) =>{
-      console.log(record)
-      console.log(value)
-      record.name
-        .toString()
-        .toLowerCase()
-        .includes(value.toLowerCase())
-    },
-
-    onFilterDropdownVisibleChange: visible => {
-      if (visible) {
-        setTimeout(() => {
-          const input = document.getElementById("searchInput")
-          input.focus()
-          // this.searchInput.focus();
-        }, 0);
-      }
-    },
-  },
-  {
-    title: '手机',
-    dataIndex: 'phone',
-    key: 'phone',
-  },
-  {
-    title: '邮箱',
-    dataIndex: 'email',
-    key: 'email',
-
-  },
-  {
-    title: '备注',
-    dataIndex: 'remark',
-    key: 'remark',
-
-  },
-
-  {
-    title: '状态',
-    key: 'state',
-    dataIndex: 'state',
-    scopedSlots:
-      {
-        customRender: 'state'
-      },
-  },
-  {
-    title: '操作',
-    key: 'action',
-    dataIndex:'',
-    scopedSlots:
-      {
-        customRender: 'action'
-      },
-  },
-];
-
 export default {
   name: "userMonitor",
   data() {
@@ -270,7 +192,6 @@ export default {
       searchInput: null,
       searchedColumn: '',
       id:0,
-      columns,
       fileList:[],
       addForm: this.$form.createForm(this, { name: 'coordinated' }),
       editForm: this.$form.createForm(this, { name: 'coordinated' }),
@@ -280,8 +201,8 @@ export default {
       showValue:'',
       dataList:[],
       currentPage:1,
-      pageSize:8,
-      total:500,
+      pageSize:10,
+      total:0,
       pageNt:['8','10','20','30'],
       uploadData: {
         id:"",
@@ -301,6 +222,95 @@ export default {
           sm: { span: 16 },
         },
       },
+
+      columns: [
+        {
+          title: 'AppID',
+          dataIndex: 'appId',
+          key: 'appId',
+        //  width:'100px',
+          align:'center'
+
+        },
+        {
+          title: 'UID',
+          dataIndex: 'id',
+          key: 'id',
+        //  width:'100px'
+        },
+        { title: '用户名',
+          dataIndex: 'name',
+          key: 'name',
+         // width:'150px',
+
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+            customRender: 'customRender',
+          },
+        /*/* onFilter: (value, record) =>{
+        record.name
+          .toString()
+          .toLowerCase()
+          .includes(value.toLowerCase())
+    },*!/*/
+    onFilterDropdownVisibleChange: visible => {
+      if (visible) {
+        setTimeout(() => {
+          const input = document.getElementById("searchInput")
+          //input.focus()
+          // this.searchInput.focus();
+        }, 0);
+      }
+    },
+  },
+    {
+      title: '手机',
+      dataIndex: 'phone',
+      key: 'phone',
+     // width:'220px',
+      align:'center',
+    },
+    {
+      title: '邮箱',
+      dataIndex: 'email',
+      key: 'email',
+     // width:'250px',
+      align:'center',
+
+    },
+    {
+      title: '备注',
+      dataIndex: 'remark',
+      key: 'remark',
+      //width:'200px',
+      align:'center',
+
+    },
+
+    {
+      title: '状态',
+      key: 'state',
+      dataIndex: 'state',
+      //width:'200px',
+      align:'center',
+      scopedSlots:
+      {
+        customRender: 'state'
+      },
+    },
+    {
+      title: '操作',
+      key: 'action',
+      align:'center',
+      dataIndex:'',
+      scopedSlots:
+      {
+        customRender: 'action'
+      },
+    },
+  ]
+
     };
 
   },
@@ -328,14 +338,9 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
-          // setTimeout(function(){document.getElementById("test").style.display="none";},0);
-          // setTimeout(function(){document.getElementById("test").style.display="block";},1000);
-          // columns[2].filterDropdownVisible=false
-
         }
         else {
           this.dataList=null;
@@ -348,10 +353,9 @@ export default {
       this.getDataList();
     },
     onChangeP(pageNumber) {
-      console.log('Page: ', pageNumber);
+     //
     },
     edit(name , phone , email , remark, id ){
-      console.log("edit click")
       this.uploadData.id = id
       this.uploadData.name= name;
       this.uploadData.phone = phone;
@@ -373,13 +377,9 @@ export default {
           pageSize:this.pageSize,
         }
       }).then(res=>{
-        console.log(res)
         if(res.data.code == '1001'){
           this.dataList = res.data.data.data
           this.total=res.data.data.total
-          /*let userName = "123";
-          sessionStorage.setItem("logName",userName);
-          console.log(sessionStorage.getItem("logName"))*/
         }
       })
     },
@@ -396,11 +396,9 @@ export default {
         }
       }).then(res=>{
         if(res.data.code=='1001'){
-          // that.$message.success(res.data.msg);
           alert('添加成功')
           this.getDataList();
         }else{
-          // that.$message.success(res.data.msg);
           alert('添加失败')
         }
       })
@@ -473,15 +471,50 @@ export default {
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
-      //this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
+      this.searchText = selectedKeys[0];
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/users',
+        params:{
+          name:this.searchName,
+          currentPage:1,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+        else {
+          this.dataList=null;
+        }
+      })
+
     },
     handleReset(clearFilters) {
       clearFilters();
-      this.searchText = '';
+      this.searchName = '';
+      this.$ajax({
+        method:"get",
+        url:'/monitor/admin/users',
+        params:{
+          name:'',
+          currentPage:1,
+          pageSize:this.pageSize,
+        }
+      }).then(res=>{
+        if(res.data.code == '1001'){
+          this.dataList = res.data.data.data
+          this.total=res.data.data.total
+        }
+        else {
+          this.dataList=null;
+        }
+      })
+
     },
     onChange(page,pageSize){
-      console.log(page,pageSize)
+      console.log('1232131')
       this.currentPage=page;
       if(this.isUserName){
         this.searchNameAjax()
@@ -491,7 +524,6 @@ export default {
 
     },
     onShowSizeChange(current, pageSize) {
-      console.log(current, pageSize);
       this.pageSize = pageSize;
       this.getDataList();
     },
@@ -535,8 +567,8 @@ export default {
     handleSubmit() {
       //
     },
-    gotoLog(name){
-      sessionStorage.setItem('name',name);
+    gotoLog(item){
+      sessionStorage.setItem('name1', JSON.stringify(item));
       this.$router.replace('/userNoticeLog')
     },
     statePoint(state){
@@ -605,6 +637,7 @@ export default {
 .page{
   text-align: right;
   margin-top: 30px;
+  margin-right: 30px;
 }
 .modalButton{
   margin-top:10px;

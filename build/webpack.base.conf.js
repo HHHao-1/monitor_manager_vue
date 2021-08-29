@@ -8,7 +8,12 @@ function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
 
-
+const conditionalCompiler = {
+  loader: 'js-conditional-compile-loader',
+  options: {
+    internal: process.env.npm_config_internal, // enabled by `npm run build --internal`
+  }
+}
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
@@ -33,12 +38,18 @@ module.exports = {
     rules: [
       {
         test: /\.vue$/,
-        loader: 'vue-loader',
-        options: vueLoaderConfig
+        // loader: 'vue-loader',
+        // use: ['vue-loader', conditionalCompiler],
+        // options: vueLoaderConfig
+        use: [{
+          loader: 'vue-loader',
+          options: vueLoaderConfig
+        }, conditionalCompiler]
       },
       {
         test: /\.js$/,
         loader: 'babel-loader',
+        // use: ['babel-loader', conditionalCompiler],
         include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
       },
       {

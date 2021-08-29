@@ -2,7 +2,7 @@
   <div class="tm">
     <!--二维码-->
     <div class="containerT" :style="{height:height + 'px'}" v-show="tmshow == 1">
-      <h1 style="color: #fff">Chaindigg CBI</h1>
+      <h1 style="color: #fff">监控系统管理后台</h1>
       <div id="login_container"></div>
     </div>
     <!---->
@@ -56,8 +56,17 @@ export default {
       })()
     };
     window.onload = function () {
-      var url = encodeURIComponent('https://bifrost.chaindigg.com/api/login/auth_code')
-      var goto = encodeURIComponent('https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=dingoazcm5jegnjk78as0f&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=' + url)
+
+      let appid = 'dingoazcm5jegnjk78as0f'
+      let baseUrl = 'https://bifrost.chaindigg.com'
+
+      /* IFTRUE_internal */
+      appid = 'dingoaswifiq5fuxsiyak7'
+      baseUrl = 'http://bifrost.blockdigg.com'
+      /* FITRUE_internal */
+
+      var url = encodeURIComponent(`${baseUrl}/api/login/auth_code`)
+      var goto = encodeURIComponent(`https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=${appid}&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=${url}`)
 
       // console.log(goto);
       var obj = DDLogin({id: "login_container", goto: goto, style: "border:none;", width: "365", height: "400"});
@@ -68,7 +77,7 @@ export default {
           var loginTmpCode = event.data;
           axios({
             method: 'get',
-            url: "https://bifrost.chaindigg.com/connect/oauth2/sns_authorize?appid=dingoazcm5jegnjk78as0f&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=REDIRECT_URI&loginTmpCode=" + loginTmpCode,
+            url: `${baseUrl}/connect/oauth2/sns_authorize?appid=${appid}&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=REDIRECT_URI&loginTmpCode=${loginTmpCode}`,
           }).then(res => {
             if (res.data.code == 0) {
               axios({
@@ -78,10 +87,12 @@ export default {
                 // 表示接口调用成功
                 let loginData = res.data.data.users[0].permission;
                 if (loginData.apply === 0) {
-                  that.$router.push('/userMonitor')
                   // 1表示登陆成功
                   sessionStorage.setItem("login","1")
                   sessionStorage.setItem("name",res.data.data.users[0].name)
+                  that.$nextTick(_ => {
+                    that.$router.push('/userMonitor')
+                  })
                 } else if (loginData.apply == 1) {
                   that.tmshow = 2
                   axios({
