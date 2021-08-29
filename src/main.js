@@ -29,7 +29,6 @@ Vue.use(Upload);
 
 // Vue.use(ElementUI);
 /* eslint-disable no-new */
-
 router.beforeEach((to, from, next) => {
   if (to.matched.some(m => m.meta.auth)) {
     // 对路由进行验证
@@ -45,7 +44,6 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
-
 
 
 new Vue({
